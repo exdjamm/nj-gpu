@@ -30,3 +30,11 @@
 *.exe
 *.out
 *.app
+*.run
+
+# Aux
+*.sh
+*.py
+
+# Folders
+ign_*/
