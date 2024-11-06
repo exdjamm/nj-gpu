@@ -8,6 +8,11 @@
 
 void nj_read_init(nj_read_t* r);
 
+/* 
+Recebe um nj_read_t e os parametros p e k, alloca e copia para memoria global do device.
+ */
+nj_data_t nj_data_to_device(nj_read_t r, float p, int k);
+
 void nj_read_init(nj_read_t* r){
     r->D = r->S = NULL;
     r->N = 0;
@@ -54,7 +59,7 @@ void free_nj_read(nj_read_t r){
     free(r.S);
 }
 
-nj_data_t nj_data_to_device(nj_read_t r, int flex, float p, int k){
+nj_data_t nj_data_to_device(nj_read_t r, float p, int k){
     nj_data_t d_data;
     size_t size_matrix = r.N*(r.N-1)/2;
     size_t size_select_otus = p*r.N;
@@ -69,9 +74,9 @@ nj_data_t nj_data_to_device(nj_read_t r, int flex, float p, int k){
     cudaMalloc(&(d_data.Q), sizeof(float)*size_matrix);
     cudaMalloc(&(d_data.S), sizeof(float)*r.N);
 
-    if(flex){
-        cudaMalloc(&(d_data.positions), sizeof(int)*size_matrix);
-    }
+    // if(flex){
+    //     cudaMalloc(&(d_data.positions), sizeof(int)*size_matrix);
+    // }
 
     cudaMemcpy(d_data.D, r.D, sizeof(float)*size_matrix, cudaMemcpyHostToDevice);
     cudaMemcpy(d_data.S, r.S, sizeof(float)*r.N, cudaMemcpyHostToDevice);
