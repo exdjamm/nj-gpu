@@ -19,15 +19,16 @@ __global__ void ignorePositionsQ(nj_data_t d, int position);
 __global__ void buildQ(nj_data_t d){
     int idx = blockIdx.x*blockDim.x + threadIdx.x;
     float value, d_rc;
-    int i, j;
+    int pos, i, j;
 
-    if(idx >= d.N*(d.N-1)/2)
+    if(idx >= d.N*(d.N)/2)
         return;
 
-    i = idx/d.N;
-    j = idx%d.N;
+    pos = matrix_to_otu_position(idx, d.N);
+    i = pos / d.N;
+    j = pos % d.N;
 
-    d_rc = d_get_D_position(d, idx/d.N, idx%d.N);
+    d_rc = d_get_D_position(d, i, j);
     value = (d.N - 2) * d_rc - d.S[i] - d.S[j];
 
     d_set_Q_position(d, i, j, value);
@@ -54,6 +55,12 @@ __global__ void reduceQ(nj_data_t d, float* values_result, int* position_result)
     int r_idx = blockIdx.x;
     int thread_per_block = blockDim.x;
 
+    int i, j;
+    int pos = matrix_to_otu_position(idx, d.N);
+    
+    i = pos / d.N;
+    j = pos % d.N;
+
     extern __shared__ int array[]; // 2*thread_per_block
 
     float* values_min = (float*) &array[0];
@@ -62,9 +69,9 @@ __global__ void reduceQ(nj_data_t d, float* values_result, int* position_result)
     values_min[threadIdx.x] = FLT_MAX;
     __syncthreads();
 
-    if(idx < d.N*(d.N - 1)/2){
-        values_min[threadIdx.x] = d_get_Q_position(d, idx/d.N , idx % d.N);
-        positions_min[threadIdx.x] = idx;
+    if(idx < d.N*(d.N)/2){
+        values_min[threadIdx.x] = d_get_Q_position(d, i , j);
+        positions_min[threadIdx.x] = pos;
     }
     __syncthreads();
 
