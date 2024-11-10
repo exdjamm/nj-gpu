@@ -88,7 +88,7 @@ __global__ void reduceQ(nj_data_t d, float* values_result, int* position_result)
     }
 
     if(threadIdx.x == 0){
-        values_result[r_idx] = values_result[0];
+        values_result[r_idx] = values_min[0];
         position_result[r_idx] = positions_min[0];
     }
 }
