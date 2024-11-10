@@ -47,9 +47,9 @@ void nj_normal(nj_data_t d, int threads_per_block){
 
         for (int i = 0; i < gridMatrix; i++)
         {
-            if(position_min[i] < min_value)
+            if(values_min[i] < min_value)
             {
-                min_value = position_min[i];
+                min_value = values_min[i];
                 min_position = position_min[i];
             }
         }
