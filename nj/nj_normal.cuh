@@ -20,7 +20,7 @@ void nj_normal(nj_data_t d, int threads_per_block){
     float min_value;
     int min_position;
 
-    size_array = d.N*(d.N-1)/2;
+    size_array = d.N*(d.N)/2;
 
     gridMatrix = (size_array+threads_per_block-1)/threads_per_block;
     gridArray = (d.N+threads_per_block-1)/threads_per_block;
@@ -60,7 +60,7 @@ void nj_normal(nj_data_t d, int threads_per_block){
         cudaDeviceSynchronize();
 
         d.N -= 1;
-        size_array = d.N*(d.N - 1)/2;
+        size_array = d.N*(d.N)/2;
 
         gridMatrix = (size_array+threads_per_block-1)/threads_per_block;
         gridArray = (d.N+threads_per_block-1)/threads_per_block;

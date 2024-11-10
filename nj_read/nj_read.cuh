@@ -35,7 +35,7 @@ void nj_read_file(nj_read_t* r, const char* file){
     // TODO: Colocar para criar ou ler ID das OTUs para criacao de string de arvore
 
     r->N = N; 
-    r->D = (float*) calloc(N*(N-1)/2, sizeof(float));
+    r->D = (float*) calloc(N*(N)/2, sizeof(float));
     r->S = (float*) calloc(N, sizeof(float));
 
     for (int i = 0; i < N; i++)
@@ -61,7 +61,7 @@ void free_nj_read(nj_read_t r){
 
 nj_data_t nj_data_to_device(nj_read_t r, float p, int k){
     nj_data_t d_data;
-    size_t size_matrix = r.N*(r.N-1)/2;
+    size_t size_matrix = r.N*(r.N)/2;
     size_t size_select_otus = p*r.N;
 
     d_data.N = r.N;
