@@ -67,6 +67,9 @@ void nj_normal(nj_data_t d, int threads_per_block){
 
         run = d.N > 3;
     }
+
+    free(values_min);
+    free(position_min);
 }
 
 #endif
