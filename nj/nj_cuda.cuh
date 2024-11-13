@@ -24,7 +24,7 @@ __global__ void buildQ(nj_data_t d){
     if(idx >= d.N*(d.N)/2)
         return;
 
-    pos = matrix_to_otu_position(idx, d.N);
+    pos = matrix_to_otu_position(idx, d.N, d.stride);
     i = pos / d.stride;
     j = pos % d.stride;
 
@@ -56,7 +56,7 @@ __global__ void reduceQ(nj_data_t d, float* values_result, int* position_result)
     int thread_per_block = blockDim.x;
 
     int i, j;
-    int pos = matrix_to_otu_position(idx, d.N);
+    int pos = matrix_to_otu_position(idx, d.N, d.stride);
     
     i = pos / d.stride;
     j = pos % d.stride;

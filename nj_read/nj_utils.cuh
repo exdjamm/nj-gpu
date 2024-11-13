@@ -33,7 +33,7 @@ __device__ __host__ int otu_to_matrix_position(int s_i, int s_j, int N);
 /* 
 Converte as coordenadas do espaço do array em memoria para o espaço de OTUs.
  */
-__device__ __host__ int matrix_to_otu_position(int s_idx, int N);
+__device__ __host__ int matrix_to_otu_position(int s_idx, int N, int stride);
 
 __host__ void set_array_position(nj_read_t r, int i, int j, float value);
 
