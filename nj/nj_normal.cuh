@@ -33,7 +33,7 @@ void nj_normal(nj_data_t d, int threads_per_block){
 
     sMemSize = threads_per_block*sizeof(float) + threads_per_block*sizeof(int);
 
-    run = d.N > 3;
+    run = d.N >= 3;
 
     while(run){
 
@@ -65,7 +65,7 @@ void nj_normal(nj_data_t d, int threads_per_block){
         gridMatrix = (size_array+threads_per_block-1)/threads_per_block;
         gridArray = (d.N+threads_per_block-1)/threads_per_block;
 
-        run = d.N > 3;
+        run = d.N >= 3;
     }
 
     free(values_min);
