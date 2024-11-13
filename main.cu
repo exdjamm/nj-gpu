@@ -34,21 +34,21 @@ int main(int argc, char const *argv[]){
 
     if (type == 0) // NJ
     {
-                nj_normal(data, TPB);
+        nj_normal(data, TPB);
 
     }else if(type == 1) // FNJ - Reduce
     {
-                // TODO: Function call
+        // TODO: Function call
     }
     else if(type == 2) // FNJ - kHeap
     {
-                // TODO: Function call
+        // TODO: Function call
     }
-
+    
     time_end();
 
     printf("%d; %.4f\n;", read.N, elapsed_time);
-    
+
     free_nj_data_device(data);
     free_nj_read(read);
 
