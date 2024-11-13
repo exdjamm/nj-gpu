@@ -7,6 +7,8 @@
 #include "./nj/nj_flex.cuh"
 #include "./nj/nj_normal.cuh"
 
+#include "./time_analisys.cuh"
+
 int main(int argc, char const *argv[]){
     
     if(argc != 6){
@@ -26,21 +28,26 @@ int main(int argc, char const *argv[]){
 
     nj_read_file(&read, file);
 
+    data = nj_data_to_device(read, p_value, k_number);
+
+    time_start();
+
     if (type == 0) // NJ
     {
-        data = nj_data_to_device(read, p_value, k_number);
-        nj_normal(data, TPB);
+                nj_normal(data, TPB);
 
     }else if(type == 1) // FNJ - Reduce
     {
-        data = nj_data_to_device(read, p_value, k_number);
-        // TODO: Function call
+                // TODO: Function call
     }
     else if(type == 2) // FNJ - kHeap
     {
-        data = nj_data_to_device(read, p_value, k_number);
-        // TODO: Function call
+                // TODO: Function call
     }
+
+    time_end();
+
+    printf("%d; %.4f\n;", read.N, elapsed_time);
     
     free_nj_data_device(data);
     free_nj_read(read);
