@@ -67,6 +67,7 @@ nj_data_t nj_data_to_device(nj_read_t r, float p, int k){
     d_data.N = r.N;
     d_data.p = p;
     d_data.k = k;
+    d_data.stride = r.N;
 
     d_data.positions = 0;
     

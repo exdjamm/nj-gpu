@@ -25,8 +25,8 @@ __global__ void buildQ(nj_data_t d){
         return;
 
     pos = matrix_to_otu_position(idx, d.N);
-    i = pos / d.N;
-    j = pos % d.N;
+    i = pos / d.stride;
+    j = pos % d.stride;
 
     d_rc = d_get_D_position(d, i, j);
     value = (d.N - 2) * d_rc - d.S[i] - d.S[j];
@@ -42,8 +42,8 @@ __global__ void ignorePositionsQ(nj_data_t d, int position){
 
     if(idx >= d.N) return;
 
-    i = position / d.N;
-    j = position % d.N;
+    i = position / d.stride;
+    j = position % d.stride;
     
     d_set_Q_position(d, idx, j, FLT_MAX);
     d_set_Q_position(d, idx, i, FLT_MAX);
@@ -58,8 +58,8 @@ __global__ void reduceQ(nj_data_t d, float* values_result, int* position_result)
     int i, j;
     int pos = matrix_to_otu_position(idx, d.N);
     
-    i = pos / d.N;
-    j = pos % d.N;
+    i = pos / d.stride;
+    j = pos % d.stride;
 
     extern __shared__ int array[]; // 2*thread_per_block
 
@@ -97,8 +97,8 @@ __global__ void updateD(nj_data_t d, int position){
     int idx = blockDim.x*blockIdx.x + threadIdx.x;
     if(idx >= d.N) return;
     
-    int position_i = position / d.N;
-    int position_j = position % d.N;
+    int position_i = position / d.stride;
+    int position_j = position % d.stride;
 
     float d_ij;
     d_ij = d_get_D_position(d, position_i, position_j);
@@ -124,7 +124,7 @@ __global__ void resizeD(nj_data_t d, int position){
     if(idx >= d.N) return;
     
     // int position_i = position / d.N;
-    int position_j = position % d.N;
+    int position_j = position % d.stride;
 
     float d_n_minus_value = d_get_D_position(d, idx, d.N - 1);
 
