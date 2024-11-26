@@ -9,14 +9,16 @@
 
 #include "./time_analisys.cuh"
 
-int main(int argc, char const *argv[]){
-    
-    if(argc != 6){
+int main(int argc, char const *argv[])
+{
+
+    if (argc != 6)
+    {
         printf("Arguments in the form: [file] [type] [p] [k] [TPB]\n");
         return 1;
     }
 
-    const char* file = argv[1];
+    const char *file = argv[1];
     int type = atoi(argv[2]);
     float p_value = atof(argv[3]);
     int k_number = atoi(argv[4]);
@@ -35,16 +37,17 @@ int main(int argc, char const *argv[]){
     if (type == 0) // NJ
     {
         nj_normal(data, TPB);
+    }
+    else if (type == 1) // FNJ - Reduce
+    {
+        // TODO: Function call
+        nj_flex(data, TPB);
+    }
+    else if (type == 2) // FNJ - kHeap
+    {
+        // TODO: Function call
+    }
 
-    }else if(type == 1) // FNJ - Reduce
-    {
-        // TODO: Function call
-    }
-    else if(type == 2) // FNJ - kHeap
-    {
-        // TODO: Function call
-    }
-    
     time_end();
 
     printf("%d; %.4f\n;", read.N, elapsed_time);
