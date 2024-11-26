@@ -24,6 +24,8 @@ int main(int argc, char const *argv[])
     int k_number = atoi(argv[4]);
     int TPB = atoi(argv[5]);
 
+    printf("%s, %d, %.3f, %d\n", file, type, p_value, k_number);
+
     nj_read_t read;
     nj_data_t data;
     nj_read_init(&read);
