@@ -84,23 +84,23 @@ __host__ void set_array_position(nj_read_t r, int i_otu, int j_otu, float value)
 }
 
 __device__ void d_set_D_position(nj_data_t d, int i_otu, int j_otu, float value){
-    int pos = otu_to_matrix_position(i_otu, j_otu, d.N);
+    int pos = otu_to_matrix_position(i_otu, j_otu, d.N); // stride
 
     d.D[pos] = value;
 }
 __device__ float d_get_D_position(nj_data_t d, int i_otu, int j_otu){
-    int pos = otu_to_matrix_position(i_otu, j_otu, d.N);
+    int pos = otu_to_matrix_position(i_otu, j_otu, d.N); // stride
 
     return d.D[pos];
 }
 
 __device__ void d_set_Q_position(nj_data_t d, int i_otu, int j_otu, float value){
-    int pos = otu_to_matrix_position(i_otu, j_otu, d.N);
+    int pos = otu_to_matrix_position(i_otu, j_otu, d.N); // stride
 
     d.Q[pos] = value;
 }
 __device__ float d_get_Q_position(nj_data_t d, int i_otu, int j_otu){
-    int pos = otu_to_matrix_position(i_otu, j_otu, d.N);
+    int pos = otu_to_matrix_position(i_otu, j_otu, d.N); // stride
 
     return d.Q[pos];
 }
