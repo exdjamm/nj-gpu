@@ -6,7 +6,7 @@
 #include "../nj_read/nj_utils.cuh"
 
 __global__ void buildQ(nj_data_t d);
-__global__ void buildQBatch(nj_data_t d);
+__global__ void buildQBatch(nj_data_t d, int batch);
 __global__ void buildQ2D(nj_data_t d);
 
 __global__ void reduceQ(nj_data_t d, float *values_result, int *position_result);
@@ -25,9 +25,9 @@ __global__ void buildQ(nj_data_t d)
     if (idx >= d.N * (d.N) / 2)
         return;
 
-    pos = matrix_to_otu_position(idx, d.N, d.stride);
-    i = pos / d.stride;
-    j = pos % d.stride;
+    pos = rect_pos_to_otu_pos(idx, d.N);
+    i = pos / d.N;
+    j = pos % d.N;
 
     d_rc = d_get_D_position(d, i, j);
     value = (d.N - 2) * d_rc - d.S[i] - d.S[j];
@@ -46,8 +46,8 @@ __global__ void ignorePositionsQ(nj_data_t d, int position)
     if (idx >= d.N)
         return;
 
-    i = position / d.stride;
-    j = position % d.stride;
+    i = position / d.N;
+    j = position % d.N;
 
     printf("ignPositions: %d %d \n", i, j);
 
@@ -63,10 +63,10 @@ __global__ void reduceQ(nj_data_t d, float *values_result, int *position_result)
     int thread_per_block = blockDim.x;
 
     int i, j;
-    int pos = matrix_to_otu_position(idx, d.N, d.stride);
+    int pos = rect_pos_to_otu_pos(idx, d.N);
 
-    i = pos / d.stride;
-    j = pos % d.stride;
+    i = pos / d.N;
+    j = pos % d.N;
 
     extern __shared__ int array[]; // 2*thread_per_block
 
@@ -111,8 +111,8 @@ __global__ void updateD(nj_data_t d, int position)
     if (idx >= d.N)
         return;
 
-    int position_i = position / d.stride;
-    int position_j = position % d.stride;
+    int position_i = position / d.N;
+    int position_j = position % d.N;
 
     float d_ij;
     d_ij = d_get_D_position(d, position_i, position_j);
@@ -141,7 +141,7 @@ __global__ void resizeD(nj_data_t d, int position)
         return;
 
     // int position_i = position / d.N;
-    int position_j = position % d.stride;
+    int position_j = position % d.N;
 
     float d_n_minus_value = d_get_D_position(d, idx, d.N - 1);
 
