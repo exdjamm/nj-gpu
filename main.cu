@@ -52,7 +52,7 @@ int main(int argc, char const *argv[])
 
     time_end();
 
-    printf("%d; %.4f\n;", read.N, elapsed_time);
+    printf("%d; %.4f;\n", read.N, elapsed_time);
 
     free_nj_data_device(data);
     free_nj_read(read);
