@@ -121,7 +121,7 @@ __inline__ __device__ void imergePath(K *aItems, K *bItems,
         else if (aI == size || (bI < size && aItems[aI] > bItems[bI]))
         {
             tmpItems[i] = bItems[bI];
-            tmpAuxItems[i] = aAuxItems[bI];
+            tmpAuxItems[i] = bAuxItems[bI];
             bI++;
         }
     }
