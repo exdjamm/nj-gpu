@@ -13,6 +13,7 @@ __global__ void reduceQ(nj_data_t d, float *values_result, int *position_result)
 
 __global__ void updateD(nj_data_t d, int position);
 __global__ void resizeD(nj_data_t d, int position);
+__global__ void resizeDFlex(nj_data_t d, int position, int end_position);
 
 __global__ void ignorePositionsQ(nj_data_t d, int position);
 
@@ -150,6 +151,29 @@ __global__ void resizeD(nj_data_t d, int position)
 
     if (idx == 0)
         d.S[position_j] = d.S[d.N - 1];
+
+    if (idx == position_j)
+        return;
+
+    d_set_D_position(d, idx, position_j, d_n_minus_value);
+}
+
+__global__ void resizeDFlex(nj_data_t d, int position, int end_position)
+{
+    int idx = blockDim.x * blockIdx.x + threadIdx.x;
+    if (idx >= d.N)
+        return;
+
+    // int position_i = position / d.N;
+    int position_j = position % d.N;
+
+    float d_n_minus_value = d_get_D_position(d, idx, end_position);
+
+    if (position_j == (end_position))
+        return;
+
+    if (idx == 0)
+        d.S[position_j] = d.S[end_position];
 
     if (idx == position_j)
         return;

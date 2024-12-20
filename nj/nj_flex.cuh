@@ -87,7 +87,13 @@ void nj_flex(nj_data_t d, int threads_per_block)
                 continue;
 
             updateD<<<gridArray, threads_per_block>>>(d, ignore_positions[i]);
-            resizeD<<<gridArray, threads_per_block>>>(d, ignore_positions[i]);
+        }
+
+        for (int i = 0; i < k_pairs; i++)
+        {
+            if (ignore_positions[i] == -1)
+                continue;
+            resizeDFlex<<<gridArray, threads_per_block>>>(d, ignore_positions[i], d.N - i - 1);
         }
 
         cudaDeviceSynchronize();
