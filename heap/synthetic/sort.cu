@@ -69,7 +69,7 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort =
 int main(int argc, char *argv[])
 {
 
-    if (argc != 5)
+    if (argc != 4)
     {
         cout << argv[0] << " [test type] [# keys in M] [keyType: 0:random 1:ascend 2:descend]\n";
         return -1;
