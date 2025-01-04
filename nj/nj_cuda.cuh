@@ -36,6 +36,29 @@ __global__ void buildQ(nj_data_t d)
     d_set_Q_position(d, i, j, value);
 }
 
+__global__ void buildQBatch(nj_data_t d, int batch)
+{
+    int idx = blockIdx.x * blockDim.x + threadIdx.x * batch;
+    float value, d_rc;
+    int pos, i, j;
+
+    if (idx >= d.N * (d.N) / 2)
+        return;
+
+    for (int k = 0; k < batch; k++)
+        if (idx + k < d.N * (d.N) / 2)
+        {
+            pos = rect_pos_to_otu_pos(idx + k, d.N);
+            i = pos / d.N;
+            j = pos % d.N;
+
+            d_rc = d_get_D_position(d, i, j);
+            value = (d.N - 2) * d_rc - d.S[i] - d.S[j];
+
+            d_set_Q_position(d, i, j, value);
+        }
+}
+
 __global__ void ignorePositionsQ(nj_data_t d, int position)
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
