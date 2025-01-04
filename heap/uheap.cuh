@@ -40,16 +40,18 @@ public:
         cudaMalloc((void **)&heapItems, sizeof(K) * batchSize * (batchNum + 1));
         // initialize heap items with max value
         K *tmp = new K[batchSize * (batchNum + 1)];
-        for (int i = 0; i < (batchNum + 1) * batchSize; i++)
-        {
-            tmp[i] = init_limits;
-        }
+        std::fill(tmp, tmp + batchSize * (batchNum + 1), init_limits);
         cudaMemcpy(heapItems, tmp, sizeof(K) * batchSize * (batchNum + 1), cudaMemcpyHostToDevice);
         delete[] tmp;
         tmp = NULL;
 
         cudaMalloc((void **)&auxItems, sizeof(U) * batchSize * (batchNum + 1));
-        cudaMemset(auxItems, init_limits_aux, sizeof(U) * batchSize * (batchNum + 1));
+
+        U *tmp = new U[batchSize * (batchNum + 1)];
+        std::fill(tmp, tmp + batchSize * (batchNum + 1), init_limits_aux);
+        cudaMemcpy(auxItems, tmp, sizeof(U) * batchSize * (batchNum + 1), cudaMemcpyHostToDevice);
+        delete[] tmp;
+        tmp = NULL;
 
         cudaMalloc((void **)&status, sizeof(int) * (batchNum + 1));
         cudaMemset(status, AVAIL, sizeof(int) * (batchNum + 1));
@@ -76,15 +78,16 @@ public:
         // tmp = NULL;
         // initialize heap items with max value
         K *tmp = new K[batchSize * (batchNum + 1)];
-        for (int i = 0; i < (batchNum + 1) * batchSize; i++)
-        {
-            tmp[i] = init_limits;
-        }
+        std::fill(tmp, tmp + batchSize * (batchNum + 1), init_limits);
         cudaMemcpy(heapItems, tmp, sizeof(K) * batchSize * (batchNum + 1), cudaMemcpyHostToDevice);
         delete[] tmp;
         tmp = NULL;
 
-        cudaMemset(auxItems, init_limits_aux, sizeof(U) * batchSize * (batchNum + 1));
+        U *tmp = new U[batchSize * (batchNum + 1)];
+        std::fill(tmp, tmp + batchSize * (batchNum + 1), init_limits_aux);
+        cudaMemcpy(auxItems, tmp, sizeof(U) * batchSize * (batchNum + 1), cudaMemcpyHostToDevice);
+        delete[] tmp;
+        tmp = NULL;
 
         cudaMemset(status, AVAIL, sizeof(int) * (batchNum + 1));
 
