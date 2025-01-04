@@ -1,6 +1,8 @@
 #ifndef _H_NJ_UTILS
 #define _H_NJ_UTILS
 
+#include <float.h>
+
 struct nj_read
 {
     float *D;
@@ -163,6 +165,11 @@ __device__ void d_set_Q_position(nj_data_t d, int i_otu, int j_otu, float value)
 }
 __device__ float d_get_Q_position(nj_data_t d, int i_otu, int j_otu)
 {
+    if (i_otu >= d.N || j_otu >= d.N)
+        return FLT_MAX;
+    if (i_otu < 0 || j_otu < 0)
+        return FLT_MAX;
+
     int pos = otu_to_mem_position(i_otu, j_otu);
 
     return d.Q[pos];
