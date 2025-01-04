@@ -73,7 +73,7 @@ __global__ void ignorePositionsQ(nj_data_t d, int position)
     i = position / d.N;
     j = position % d.N;
 
-    printf("ignPositions: %d %d \n", i, j);
+    printf("ignPositions: %d %d %d\n", i, j, idx);
 
     d_set_Q_position(d, idx, j, FLT_MAX);
     d_set_Q_position(d, idx, i, FLT_MAX);
