@@ -824,6 +824,8 @@ __global__ void d_ResetHeap(UHeap<float, int> *heap)
 
     const int size = heap->batchSize * (heap->batchNum + 1);
 
+    int idx = blockDim.x * blockIdx.x + threadIdx.x;
+
     for (int index = threadIdx.x; index < size; index += blockDim.x)
     {
         heapItems[index] = heap->init_limits;
