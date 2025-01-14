@@ -6,9 +6,9 @@
 #include "nj_cuda.cuh"
 #include "nj_flex_cuda.cuh"
 
-void nj_normal(nj_data_t d, int threads_per_block);
+void nj_flex_heap(nj_data_t d, int threads_per_block);
 
-void nj_normal(nj_data_t d, int threads_per_block)
+void nj_flex_heap(nj_data_t d, int threads_per_block)
 {
     int size_array, run;
     int gridMatrix, gridArray;
@@ -23,7 +23,6 @@ void nj_normal(nj_data_t d, int threads_per_block)
 
     int batchNum = 512 * 1024;
     int batchSize = 1024;
-    int sMemSize;
 
     int pair_number = d.N * d.p;
 
@@ -44,7 +43,7 @@ void nj_normal(nj_data_t d, int threads_per_block)
     gridArray = (d.N + threads_per_block - 1) / threads_per_block;
 
     sMemSize = batchSize * 4 * sizeof(float) + batchSize * 4 * sizeof(int);
-    sMemSize += (threads_per_block + 1) * sizeof(int) + 2 * batchSize * sizeof(float) + 2 * batchSize * sizeof(int);
+    sMemSize += /* (threads_per_block + 1) * sizeof(int) + */ 2 * batchSize * sizeof(float) + 2 * batchSize * sizeof(int);
 
     run = d.N >= 3;
 
@@ -57,6 +56,8 @@ void nj_normal(nj_data_t d, int threads_per_block)
         initPositionsData<<<1, threads_per_block>>>(d_positions, d_collected_number, pair_number);
         cudaMemcpy(&h_collect_number, d_collected_number, sizeof(int), cudaMemcpyDeviceToHost);
 
+        h_heap.reset();
+
         buildQUHeap<<<32, threads_per_block, sMemSize>>>(d, d_heap, batchSize);
 
         while (h_collect_number < pair_number)
@@ -66,7 +67,7 @@ void nj_normal(nj_data_t d, int threads_per_block)
             cudaMemcpy(&h_collect_number, d_collected_number, sizeof(int), cudaMemcpyDeviceToHost);
         }
 
-        updateDK<<<1, 1>>>(d, d_positions, pair_number);
+        updateDK<<<1, threads_per_block>>>(d, d_positions, pair_number);
 
         for (int i = 0; i < pair_number; i++)
         {
