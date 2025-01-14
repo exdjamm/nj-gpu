@@ -83,11 +83,11 @@ public:
         delete[] tmp;
         tmp = NULL;
 
-        U *tmp = new U[batchSize * (batchNum + 1)];
-        std::fill(tmp, tmp + batchSize * (batchNum + 1), init_limits_aux);
-        cudaMemcpy(auxItems, tmp, sizeof(U) * batchSize * (batchNum + 1), cudaMemcpyHostToDevice);
-        delete[] tmp;
-        tmp = NULL;
+        U *tmp2 = new U[batchSize * (batchNum + 1)];
+        std::fill(tmp2, tmp2 + batchSize * (batchNum + 1), init_limits_aux);
+        cudaMemcpy(auxItems, tmp2, sizeof(U) * batchSize * (batchNum + 1), cudaMemcpyHostToDevice);
+        delete[] tmp2;
+        tmp2 = NULL;
 
         cudaMemset(status, AVAIL, sizeof(int) * (batchNum + 1));
 
