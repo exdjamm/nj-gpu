@@ -4,6 +4,7 @@
 
 #include "./nj_read/nj_read.cuh"
 
+#include "./nj/nj_flex_heap.cuh"
 #include "./nj/nj_flex.cuh"
 #include "./nj/nj_normal.cuh"
 
@@ -47,7 +48,7 @@ int main(int argc, char const *argv[])
     }
     else if (type == 2) // FNJ - kHeap
     {
-        // TODO: Function call
+        nj_flex_heap(data, TPB);
     }
 
     time_end();
