@@ -56,7 +56,7 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
         initPositionsData<<<1, threads_per_block>>>(d_positions, d_collected_number, pair_number);
         cudaMemcpy(&h_collect_number, d_collected_number, sizeof(int), cudaMemcpyDeviceToHost);
 
-        h_heap.reset();
+        d_ResetHeap<<<32, threads_per_block>>>(d_heap);
 
         buildQUHeap<<<32, threads_per_block, sMemSize>>>(d, d_heap, batchSize);
 

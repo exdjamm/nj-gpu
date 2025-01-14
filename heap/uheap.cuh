@@ -817,4 +817,18 @@ public:
     }
 };
 
+__global__ void d_ResetHeap(UHeap<float, int> *heap)
+{
+    float *heapItems = heap->heapItems;
+    int *auxItems = heap->auxItems;
+
+    const int size = heap->batchSize * (heap->batchNum + 1);
+
+    for (int index = threadIdx.x; index < size; index += blockDim.x)
+    {
+        heapItems[index] = heap->init_limits;
+        auxItems[index] = heap->init_limits_aux;
+    }
+}
+
 #endif
