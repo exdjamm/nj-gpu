@@ -38,20 +38,7 @@ public:
     {
         // prepare device heap
         cudaMalloc((void **)&heapItems, sizeof(K) * batchSize * (batchNum + 1));
-        // initialize heap items with max value
-        K *tmp = new K[batchSize * (batchNum + 1)];
-        std::fill(tmp, tmp + batchSize * (batchNum + 1), init_limits);
-        cudaMemcpy(heapItems, tmp, sizeof(K) * batchSize * (batchNum + 1), cudaMemcpyHostToDevice);
-        delete[] tmp;
-        tmp = NULL;
-
         cudaMalloc((void **)&auxItems, sizeof(U) * batchSize * (batchNum + 1));
-
-        U *tmp2 = new U[batchSize * (batchNum + 1)];
-        std::fill(tmp2, tmp2 + batchSize * (batchNum + 1), init_limits_aux);
-        cudaMemcpy(auxItems, tmp2, sizeof(U) * batchSize * (batchNum + 1), cudaMemcpyHostToDevice);
-        delete[] tmp2;
-        tmp2 = NULL;
 
         cudaMalloc((void **)&status, sizeof(int) * (batchNum + 1));
         cudaMemset(status, AVAIL, sizeof(int) * (batchNum + 1));
@@ -77,7 +64,7 @@ public:
         // delete[] tmp;
         // tmp = NULL;
         // initialize heap items with max value
-        K *tmp = new K[batchSize * (batchNum + 1)];
+        /* K *tmp = new K[batchSize * (batchNum + 1)];
         std::fill(tmp, tmp + batchSize * (batchNum + 1), init_limits);
         cudaMemcpy(heapItems, tmp, sizeof(K) * batchSize * (batchNum + 1), cudaMemcpyHostToDevice);
         delete[] tmp;
@@ -87,7 +74,7 @@ public:
         std::fill(tmp2, tmp2 + batchSize * (batchNum + 1), init_limits_aux);
         cudaMemcpy(auxItems, tmp2, sizeof(U) * batchSize * (batchNum + 1), cudaMemcpyHostToDevice);
         delete[] tmp2;
-        tmp2 = NULL;
+        tmp2 = NULL; */
 
         cudaMemset(status, AVAIL, sizeof(int) * (batchNum + 1));
 
