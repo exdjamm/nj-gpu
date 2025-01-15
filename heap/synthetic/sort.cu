@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
     setTime(&endTime);
     deleteTime = getTime(&startTime, &endTime);
 
-    printf("%s,insdel,%d,%dM,%.f,%.f,%.f\n",
+    printf("%s,insdel,%d,%d,%.4f,%.4f,%.4f\n",
            "uHeap",
            keyType, arrayNum, insertTime, deleteTime, insertTime + deleteTime);
 
