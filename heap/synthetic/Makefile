@@ -8,4 +8,4 @@ uheap_synthetic: sort.cu $(heappath)/uheap.cuh
 	$(nvcc) $(nvccflag) $(testflag) -I$(heappath)/ $< -o $@
 
 clean:
-	rm -rf out
+	rm -rf uheap_synthetic
