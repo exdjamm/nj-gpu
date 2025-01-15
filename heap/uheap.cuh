@@ -206,6 +206,40 @@ public:
         }
     }
 
+    void printHeapAux()
+    {
+
+        // TODO if you need this, print each item of the K
+
+        int h_batchCount;
+        int h_partialBufferSize;
+        cudaMemcpy(&h_batchCount, batchCount, sizeof(int), cudaMemcpyDeviceToHost);
+        cudaMemcpy(&h_partialBufferSize, partialBufferSize, sizeof(int), cudaMemcpyDeviceToHost);
+
+        int *h_status = new int[h_batchCount + 1];
+        K *h_items = new K[batchSize * (h_batchCount + 1)];
+        cudaMemcpy(h_items, auxItems, sizeof(K) * batchSize * (h_batchCount + 1), cudaMemcpyDeviceToHost);
+        cudaMemcpy(h_status, status, sizeof(int) * (h_batchCount + 1), cudaMemcpyDeviceToHost);
+
+        printf("batch partial %d_%d:", h_partialBufferSize, h_status[0]);
+
+        for (int i = 0; i < h_partialBufferSize; ++i)
+        {
+            printf(" %d", h_items[i]);
+        }
+        printf("\n");
+
+        for (int i = 1; i <= h_batchCount; ++i)
+        {
+            printf("batch %d_%d:", i, h_status[i]);
+            for (int j = 0; j < batchSize; ++j)
+            {
+                printf(" %d", h_items[i * batchSize + j]);
+            }
+            printf("\n");
+        }
+    }
+
     __device__ int getItemCount()
     {
         changeStatus(&status[0], AVAIL, INUSE);
