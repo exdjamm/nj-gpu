@@ -190,6 +190,7 @@ __global__ void updateDK(nj_data_t d, int *positions, int k)
                 update_d_2nodes(d, position, positions[pos_idx]);
             }
         }
+        int run = 1;
 
         for (int pos_idx = 0; pos_idx < k; pos_idx++)
         {
@@ -197,14 +198,18 @@ __global__ void updateDK(nj_data_t d, int *positions, int k)
             int j_vrf = positions[pos_idx] % d.N;
 
             if (i_pos == index_update || j_pos == index_update)
-                return;
+                run = 0;
         }
 
         // S'(k) = S(k) - d(a, k) - d(b, k) + d(u, k)
         // d.S[index_update] = new_duk - (new_duk * 2 + d_ij) + d.S[index_update];
-        atomicAdd(d.S + index_update, new_duk - (new_duk * 2 + d_ij));
+        if (run)
+            atomicAdd(&d.S[index_update], new_duk - (new_duk * 2 + d_ij));
+
         __syncthreads();
-        d_set_D_position(d, index_update, i_pos, new_duk);
+
+        if (run)
+            d_set_D_position(d, index_update, i_pos, new_duk);
     }
 }
 
