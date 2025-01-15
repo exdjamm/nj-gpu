@@ -246,8 +246,8 @@ __device__ void update_d_2nodes(nj_data_t d, int position_1, int position_2)
     int a_ = position_1 / d.N;
     int a = position_2 / d.N;
 
-    int b_ = position_1 / d.N;
-    int b = position_2 / d.N;
+    int b_ = position_1 % d.N;
+    int b = position_2 % d.N;
 
     float d_uv = d_get_D_position(d, a_, a) + d_get_D_position(d, a_, b) +
                  d_get_D_position(d, b_, a) + d_get_D_position(d, b_, b) -
