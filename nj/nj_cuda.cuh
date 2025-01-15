@@ -17,6 +17,20 @@ __global__ void resizeDFlex(nj_data_t d, int position, int end_position);
 
 __global__ void ignorePositionsQ(nj_data_t d, int position);
 
+#define gpuErrchk(ans)                        \
+    {                                         \
+        gpuAssert((ans), __FILE__, __LINE__); \
+    }
+inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort = true)
+{
+    if (code != cudaSuccess)
+    {
+        fprintf(stderr, "GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
+        if (abort)
+            exit(code);
+    }
+}
+
 __global__ void buildQ(nj_data_t d)
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
