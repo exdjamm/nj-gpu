@@ -12,6 +12,22 @@
 
 using namespace std;
 
+__global__ void d_ResetHeap_l(UHeap<int, int> *heap)
+{
+    int *heapItems = heap->heapItems;
+    int *auxItems = heap->auxItems;
+
+    const int size = heap->batchSize * (heap->batchNum + 1);
+
+    int idx = blockDim.x * blockIdx.x + threadIdx.x;
+
+    for (int index = threadIdx.x; index < size; index += blockDim.x)
+    {
+        heapItems[index] = heap->init_limits;
+        auxItems[index] = heap->init_limits_aux;
+    }
+}
+
 __global__ void insertKernel(UHeap<int, int> *heap,
                              int *items,
                              int *aux_items,
@@ -91,7 +107,7 @@ int main(int argc, char *argv[])
     int batchSize = 1024;
 
     arrayNum = ((arrayNum + batchSize - 1) / batchSize) * batchSize;
-    batchNum = arrayNum / batchSize;
+    batchNum = 512 * 1024;
 
     int *oriItems = new int[arrayNum];
 
@@ -125,6 +141,8 @@ int main(int argc, char *argv[])
     cudaMalloc((void **)&d_heap, sizeof(UHeap<int, int>));
     cudaMemcpy(d_heap, &h_heap, sizeof(UHeap<int, int>), cudaMemcpyHostToDevice);
 
+    d_ResetHeap_l<<<32, 512>>>(d_heap);
+
     int smemSize = batchSize * 3 * sizeof(int) + batchSize * 3 * sizeof(int);
     smemSize += (blockSize + 1) * sizeof(int) + 2 * batchSize * sizeof(int) + 2 * batchSize * sizeof(int);
 
@@ -149,7 +167,7 @@ int main(int argc, char *argv[])
     deleteTime = getTime(&startTime, &endTime);
 
     printf("%s,insdel,%d,%dM,%.f,%.f,%.f\n",
-           argv[0] == std::string("./BGPQ_T") ? "BGPQ_T" : "BGPQ_B",
+           "uHeap",
            keyType, arrayNum, insertTime, deleteTime, insertTime + deleteTime);
 
     cudaFree(heapItems);
