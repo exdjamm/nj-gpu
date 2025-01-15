@@ -21,7 +21,7 @@ __global__ void d_ResetHeap_l(UHeap<int, int> *heap)
 
     int idx = blockDim.x * blockIdx.x + threadIdx.x;
 
-    for (int index = threadIdx.x; index < size; index += blockDim.x * gridDim.x)
+    for (int index = idx; index < size; index += blockDim.x * gridDim.x)
     {
         heapItems[index] = heap->init_limits;
         auxItems[index] = heap->init_limits_aux;
