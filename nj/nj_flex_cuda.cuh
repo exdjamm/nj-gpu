@@ -197,7 +197,7 @@ __global__ void updateDK(nj_data_t d, int *positions, int k)
             int i_vrf = positions[pos_idx] / d.N;
             int j_vrf = positions[pos_idx] % d.N;
 
-            if (i_pos == index_update || j_pos == index_update)
+            if (i_vrf == index_update || j_vrf == index_update)
                 run = 0;
         }
 
