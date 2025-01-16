@@ -37,6 +37,10 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
     cudaMalloc(&d_positions, sizeof(int) * pair_number);
     cudaMalloc(&d_collected_number, sizeof(int));
 
+#ifdef DEGUB
+    int *h_result = malloc(sizeof(int) * batchSize);
+#endif
+
     size_array = d.N * (d.N) / 2;
 
     gridMatrix = (size_array + threads_per_block - 1) / threads_per_block;
@@ -70,6 +74,19 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
             getPositionsBatch<<<1, threads_per_block, sMemSize>>>(d_heap, d_result, d.N, batchSize);
             gpuErrchk(cudaPeekAtLastError());
 
+#ifdef DEBUG
+
+            cudaMemcpy(h_result, d_result, sizeof(int) * batchSize, cudaMemcpyDeviceToHost);
+
+            printf("[");
+            for (int index_result_loop = 0; index_result_loop < batchSize; index_result_loop++)
+            {
+                printf("\t %d, (%d, %d),  ", h_result[index_result_loop], h_result[index_result_loop] / d.N, h_result[index_result_loop] % d.N);
+            }
+            printf("]\n");
+
+#endif
+
             consolidationOfPositions<<<1, threads_per_block>>>(d_positions, d_result, d_collected_number, pair_number, batchSize, d.N);
             gpuErrchk(cudaPeekAtLastError());
 
@@ -95,6 +112,10 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
 
         run = d.N >= 3;
     }
+
+#ifdef DEBUG
+    free(h_result);
+#endif
 
     cudaFree(d_heap);
     cudaFree(d_collected_number);
