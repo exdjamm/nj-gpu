@@ -10,7 +10,7 @@ __device__ float calc_q(nj_data_t d, int position);
 __device__ void buildQPositions(nj_data_t d, float *Q, int *positions, int start, int batchSize, int d_size);
 
 __device__ int hasIntersection(int position_1, int position_2, int N);
-__device__ void nonUniqueFilter(int *positions, int N, int size);
+__device__ void nonUniqueFilter(int *positions, int N, int size, int smOffset);
 __device__ void pushEliminetedToEnd(float *Q, int *positions, int N, int size);
 
 __device__ void pushEliminetedToEndPositions(int *positions, int size);
@@ -110,7 +110,7 @@ __global__ void getPositionsBatch(UHeap<float, int> *heap, int *result, int N, i
 
     // NON-UNIQUE FILTER, DUPLICATION OF UNIQUE THROW OUT THE ARRAY
 
-    nonUniqueFilter(positions, N, batchSize);
+    nonUniqueFilter(positions, N, batchSize, smOffset);
     __syncthreads();
     pushEliminetedToEnd(Q, positions, N, batchSize);
     __syncthreads();
@@ -320,10 +320,19 @@ __device__ void pushEliminetedToEnd(float *Q, int *positions, int N, int size)
     }
 }
 
-__device__ void nonUniqueFilter(int *positions, int N, int size)
+__device__ void nonUniqueFilter(int *positions, int N, int size, int smOffset)
 {
     int i_pos1, i_pos2;
     int j_pos1, j_pos2;
+
+    __shared__ extern int sm[];
+    int *excludePositions = (int *)&sm[smOffset];
+
+    for (int i = threadIdx.x; i < size; i += blockDim.x)
+    {
+        excludePositions[i] = 0;
+    }
+    __syncthreads();
 
     for (int k = 2; k <= size; k <<= 1)
     {
@@ -334,11 +343,16 @@ __device__ void nonUniqueFilter(int *positions, int N, int size)
                 int ixj = i ^ j;
                 if (ixj > i)
                 {
-                    if (positions[i] != -1 && positions[ixj] != -1)
-                        if (hasIntersection(positions[i], positions[ixj], N))
+
+                    if (hasIntersection(positions[i], positions[ixj], N))
+                    {
+                        excludePositions[ixj] = -1;
+
+                        if (excludePositions[i] == -1)
                         {
-                            positions[ixj] = -1;
+                            excludePositions[ixj] = -1;
                         }
+                    }
                 }
                 __syncthreads();
             }
