@@ -140,9 +140,6 @@ __global__ void updateDK(nj_data_t d, int *positions, int k)
 
         float d_ij, new_duk;
         d_ij = d_get_D_position(d, i_pos, j_pos);
-        new_duk = (d_get_D_position(d, i_pos, index_update) +
-                   d_get_D_position(d, j_pos, index_update) - d_ij) /
-                  2;
 
         if (index_update == 0)
         {
@@ -204,8 +201,12 @@ __global__ void updateDK(nj_data_t d, int *positions, int k)
         // S'(k) = S(k) - d(a, k) - d(b, k) + d(u, k)
         // d.S[index_update] = new_duk - (new_duk * 2 + d_ij) + d.S[index_update];
         if (run)
+        {
+            new_duk = (d_get_D_position(d, i_pos, index_update) +
+                       d_get_D_position(d, j_pos, index_update) - d_ij) /
+                      2;
             atomicAdd(&d.S[index_update], new_duk - (new_duk * 2 + d_ij));
-
+        }
         __syncthreads();
 
         if (run)
