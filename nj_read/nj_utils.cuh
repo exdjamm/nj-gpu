@@ -148,11 +148,25 @@ __device__ void d_set_D_position(nj_data_t d, int i_otu, int j_otu, float value)
 {
     int pos = otu_to_mem_position(i_otu, j_otu);
 
+    if (i_otu >= d.N || j_otu >= d.N)
+        return;
+    if (i_otu < 0 || j_otu < 0)
+        return;
+    if (i_otu == j_otu)
+        return;
+
     d.D[pos] = value;
 }
 __device__ float d_get_D_position(nj_data_t d, int i_otu, int j_otu)
 {
     int pos = otu_to_mem_position(i_otu, j_otu);
+
+    if (i_otu >= d.N || j_otu >= d.N)
+        return 0;
+    if (i_otu < 0 || j_otu < 0)
+        return 0;
+    if (i_otu == j_otu)
+        return 0;
 
     return d.D[pos];
 }
