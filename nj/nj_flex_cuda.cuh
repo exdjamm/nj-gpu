@@ -421,7 +421,7 @@ __global__ void initPositionsData(int *positions, int *collect_number, int size)
     }
 
     if (threadIdx.x == 0)
-        collect_number = 0;
+        *collect_number = 0;
 }
 
 #endif
