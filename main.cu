@@ -13,19 +13,19 @@
 int main(int argc, char const *argv[])
 {
 
-    if (argc != 6)
+    if (argc != 5)
     {
-        printf("Arguments in the form: [file] [type] [p] [k] [TPB]\n");
+        printf("Arguments in the form: [file] [type] [p] [TPB]\n");
         return 1;
     }
 
     const char *file = argv[1];
     int type = atoi(argv[2]);
     float p_value = atof(argv[3]);
-    int k_number = atoi(argv[4]);
-    int TPB = atoi(argv[5]);
+    // int k_number = atoi(argv[4]);
+    int TPB = atoi(argv[4]);
 
-    printf("%s, %d, %.3f, %d\n", file, type, p_value, k_number);
+    printf("%s, %d, %.3f, %d\n", file, type, p_value, 0);
 
     nj_read_t read;
     nj_data_t data;
@@ -33,7 +33,7 @@ int main(int argc, char const *argv[])
 
     nj_read_file(&read, file);
 
-    data = nj_data_to_device(read, p_value, k_number);
+    data = nj_data_to_device(read, p_value, 0);
 
     time_start();
 
