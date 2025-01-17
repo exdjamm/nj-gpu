@@ -19,6 +19,8 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
     int *h_result;
 
     int *d_positions;
+    int *h_positions;
+
     int h_collect_number;
     int *d_collected_number;
 
@@ -31,6 +33,7 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
     UHeap<float, int> *d_heap;
 
     h_result = (int *)calloc(sizeof(int), batchSize);
+    h_positions = (int *)calloc(sizeof(int), pair_number);
 
     cudaMalloc((void **)&d_heap, sizeof(UHeap<float, int>));
     cudaMemcpy(d_heap, &h_heap, sizeof(UHeap<float, int>), cudaMemcpyHostToDevice);
@@ -96,8 +99,15 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
             cudaMemcpy(&h_collect_number, d_collected_number, sizeof(int), cudaMemcpyDeviceToHost);
         }
 
-        updateDK<<<1, threads_per_block>>>(d, d_positions, pair_number);
-        gpuErrchk(cudaPeekAtLastError());
+        // updateDK<<<1, threads_per_block>>>(d, d_positions, pair_number);
+
+        cudaMemcpy(h_positions, d_positions, sizeof(int) * pair_number, cudaMemcpyDeviceToHost);
+
+        for (int i = 0; i < pair_number; i++)
+        {
+            updateD<<<gridArray, threads_per_block>>>(d, h_positions[i]);
+            gpuErrchk(cudaPeekAtLastError());
+        }
 
         for (int i = 0; i < pair_number; i++)
         {
@@ -117,6 +127,8 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
     }
 
     free(h_result);
+    free(h_positions);
+
     cudaFree(d_heap);
     cudaFree(d_collected_number);
     cudaFree(d_positions);
