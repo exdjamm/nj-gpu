@@ -376,6 +376,16 @@ __device__ void nonUniqueFilter(int *positions, int N, int size, int smOffset)
             }
         }
     }
+
+    for (int i = threadIdx.x; i < size; i += blockIdx.x)
+    {
+        if (excludePositions[i] == -1)
+        {
+            positions[i] = -1;
+        }
+    }
+
+    __syncthreads();
 }
 
 __device__ void pushEliminetedToEndPositions(int *positions, int size)
