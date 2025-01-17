@@ -38,7 +38,7 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
     cudaMalloc(&d_collected_number, sizeof(int));
 
 #ifdef DEGUB
-    int *h_result = malloc(sizeof(int) * batchSize);
+    int *h_result = (int *)malloc(sizeof(int) * batchSize);
 #endif
 
     size_array = d.N * (d.N) / 2;

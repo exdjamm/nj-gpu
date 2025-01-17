@@ -6,6 +6,24 @@
 #include "../nj_read/nj_utils.cuh"
 #include "../heap/uheap.cuh"
 
+__device__ int atomicIncFixed(int *address, int limit)
+{
+    int old = *address;
+    int assumed, val;
+
+    do
+    {
+        assumed = old;
+        val = assumed + 1;
+
+        val = val < limit ? val : limit;
+
+        old = atomicCAS(address, assumed, val);
+    } while (old != assumed);
+
+    return old;
+}
+
 __device__ float calc_q(nj_data_t d, int position);
 __device__ void buildQPositions(nj_data_t d, float *Q, int *positions, int start, int batchSize, int d_size);
 
@@ -49,9 +67,9 @@ __global__ void consolidationOfPositions(int *positions, int *new_positions, int
 
     for (int index = threadIdx.x; index < batchSize; index += blockDim.x)
     {
-        if (*collected_number < positions_size && new_positions[index] != -1)
+        if (new_positions[index] != -1)
         {
-            int oldIndex = atomicAdd(collected_number, 1);
+            int oldIndex = atomicIncFixed(collected_number, positions_size);
             if (oldIndex < positions_size)
                 positions[oldIndex] = new_positions[index];
         }
