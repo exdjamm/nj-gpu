@@ -16,6 +16,7 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
     size_t sMemSize;
 
     int *d_result;
+    int *h_result;
 
     int *d_positions;
     int h_collect_number;
@@ -29,6 +30,8 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
     UHeap<float, int> h_heap(batchNum, batchSize, FLT_MAX, -1);
     UHeap<float, int> *d_heap;
 
+    h_result = (int *)calloc(sizeof(int), batchSize);
+
     cudaMalloc((void **)&d_heap, sizeof(UHeap<float, int>));
     cudaMemcpy(d_heap, &h_heap, sizeof(UHeap<float, int>), cudaMemcpyHostToDevice);
 
@@ -36,10 +39,6 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
 
     cudaMalloc(&d_positions, sizeof(int) * pair_number);
     cudaMalloc(&d_collected_number, sizeof(int));
-
-#ifdef DEGUB
-    int *h_result = (int *)malloc(sizeof(int) * batchSize);
-#endif
 
     size_array = d.N * (d.N) / 2;
 
@@ -74,10 +73,14 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
             getPositionsBatch<<<1, threads_per_block, sMemSize>>>(d_heap, d_result, d.N, batchSize);
             gpuErrchk(cudaPeekAtLastError());
 
-#ifdef DEBUG
-
             cudaMemcpy(h_result, d_result, sizeof(int) * batchSize, cudaMemcpyDeviceToHost);
 
+            for (int i = 0; i < batchSize; i++)
+                for (int j = i + 1; j < batchSize; j++)
+                    if (hasIntersection(h_result[i], h_result[j], d.N))
+                        h_result[j] = -1;
+
+#ifdef DEBUG
             printf("[");
             for (int index_result_loop = 0; index_result_loop < batchSize; index_result_loop++)
             {
@@ -113,10 +116,7 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
         run = d.N >= 3;
     }
 
-#ifdef DEBUG
     free(h_result);
-#endif
-
     cudaFree(d_heap);
     cudaFree(d_collected_number);
     cudaFree(d_positions);

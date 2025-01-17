@@ -27,7 +27,7 @@ __device__ int atomicIncFixed(int *address, int limit)
 __device__ float calc_q(nj_data_t d, int position);
 __device__ void buildQPositions(nj_data_t d, float *Q, int *positions, int start, int batchSize, int d_size);
 
-__device__ int hasIntersection(int position_1, int position_2, int N);
+__device__ __host__ int hasIntersection(int position_1, int position_2, int N);
 __device__ void nonUniqueFilter(int *positions, int N, int size, int smOffset);
 __device__ void pushEliminetedToEnd(float *Q, int *positions, int N, int size);
 
@@ -128,10 +128,10 @@ __global__ void getPositionsBatch(UHeap<float, int> *heap, int *result, int N, i
 
     // NON-UNIQUE FILTER, DUPLICATION OF UNIQUE THROW OUT THE ARRAY
 
-    nonUniqueFilter(positions, N, batchSize, smOffset);
-    __syncthreads();
-    pushEliminetedToEnd(Q, positions, N, batchSize);
-    __syncthreads();
+    // nonUniqueFilter(positions, N, batchSize, smOffset);
+    // __syncthreads();
+    // pushEliminetedToEnd(Q, positions, N, batchSize);
+    // __syncthreads();
 
     if (blockIdx.x == 0)
     {
@@ -277,7 +277,7 @@ __device__ void update_d_2nodes(nj_data_t d, int position_1, int position_2)
     d_set_D_position(d, a, a, d_uv);
 }
 
-__device__ int hasIntersection(int position_1, int position_2, int N)
+__device__ __host__ int hasIntersection(int position_1, int position_2, int N)
 {
     int i_pos1, j_pos1;
     int i_pos2, j_pos2;
