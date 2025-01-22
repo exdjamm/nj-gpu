@@ -6,6 +6,24 @@
 #include "nj_cuda.cuh"
 #include "nj_flex_cuda.cuh"
 
+__global__ void printArrayf(float *v, int size)
+{
+    for (int i = blockIdx.x * blockDim.x + threadIdx.x; i < size; i += blockDim.x * gridDim.x)
+    {
+        printf("%.2f, ", v[i]);
+    }
+    printf("\n");
+}
+
+__global__ void printArrayi(int *v, int size)
+{
+    for (int i = blockIdx.x * blockDim.x + threadIdx.x; i < size; i += blockDim.x * gridDim.x)
+    {
+        printf("%d, ", v[i]);
+    }
+    printf("\n");
+}
+
 void nj_flex_heap(nj_data_t d, int threads_per_block);
 
 void nj_flex_heap(nj_data_t d, int threads_per_block)
@@ -76,6 +94,8 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
                                                                   d.N, batchSize);
             gpuErrchk(cudaPeekAtLastError());
 
+            printArrayi<<<1, 1>>>(d_batchPositions, batchSize);
+
             cudaMemcpy(h_result, d_batchPositions, sizeof(int) * batchSize, cudaMemcpyDeviceToHost);
 
             for (int i = 0; i < batchSize; i++)
@@ -85,14 +105,6 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
 
             cudaMemcpy(d_batchPositions, h_result, sizeof(int) * batchSize, cudaMemcpyHostToDevice);
 
-#ifdef DEBUG
-            printf("[");
-            for (int index_result_loop = 0; index_result_loop < batchSize; index_result_loop++)
-            {
-                printf("\t %d, (%d, %d),  ", h_result[index_result_loop], h_result[index_result_loop] / d.N, h_result[index_result_loop] % d.N);
-            }
-            printf("]\n");
-#endif
             consolidationOfPositions<<<1, threads_per_block>>>(d_positions, d_batchPositions, d_collected_number, pair_number, batchSize, d.N);
             gpuErrchk(cudaPeekAtLastError());
 
