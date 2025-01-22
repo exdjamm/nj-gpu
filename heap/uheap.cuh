@@ -191,7 +191,7 @@ public:
 
         for (int i = 0; i < h_partialBufferSize; ++i)
         {
-            printf(" %d", h_items[i]);
+            printf(" %.2f", h_items[i]);
         }
         printf("\n");
 
@@ -200,7 +200,7 @@ public:
             printf("batch %d_%d:", i, h_status[i]);
             for (int j = 0; j < batchSize; ++j)
             {
-                printf(" %d", h_items[i * batchSize + j]);
+                printf(" %.2f", h_items[i * batchSize + j]);
             }
             printf("\n");
         }

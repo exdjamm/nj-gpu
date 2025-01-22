@@ -30,6 +30,8 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
 {
     int size_array, run;
     int pair_number = d.N * d.p;
+    if (pair_number == 0)
+        pair_number = 1;
     int gridMatrix, gridArray;
 
     int *h_result;
@@ -87,14 +89,19 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
         buildQUHeap<<<32, threads_per_block, sMemSize>>>(d, d_heap, d_batchQ, d_batchPositions, batchSize);
         gpuErrchk(cudaPeekAtLastError());
 
+        h_heap.printHeap();
+        h_heap.printHeapAux();
+
         while (h_collect_number < pair_number)
         {
+
             getPositionsBatch<<<1, threads_per_block, sMemSize>>>(d_heap,
                                                                   d_batchQ, d_batchPositions,
                                                                   d.N, batchSize);
             gpuErrchk(cudaPeekAtLastError());
 
             printArrayi<<<1, 1>>>(d_batchPositions, batchSize);
+            printArrayf<<<1, 1>>>(d_batchQ, batchSize);
 
             cudaMemcpy(h_result, d_batchPositions, sizeof(int) * batchSize, cudaMemcpyDeviceToHost);
 

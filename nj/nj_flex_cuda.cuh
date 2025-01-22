@@ -95,8 +95,6 @@ __global__ void buildQUHeap(nj_data_t d, UHeap<float, int> *heap, float *batchQ,
 
 __global__ void getPositionsBatch(UHeap<float, int> *heap, float *batchQ, int *batchPositions, int N, int batchSize)
 {
-    int smOffset = 0;
-
     int batchNeeded = 1;
     int outSize = 0;
 
@@ -108,7 +106,7 @@ __global__ void getPositionsBatch(UHeap<float, int> *heap, float *batchQ, int *b
         {
             __syncthreads();
 
-            heap->deleteUpdate(smOffset);
+            heap->deleteUpdate(0);
         }
         __syncthreads();
     }
