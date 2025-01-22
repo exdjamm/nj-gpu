@@ -2,6 +2,7 @@
 #define HEAPUTIL_CUH
 
 #include <cstdint>
+#include <float.h>
 
 template <typename K, typename U>
 __inline__ __device__ void batchCopy(K *dest, K *source, U *dest_aux, U *source_aux, int size, bool reset = false, K init_limits = 0)
@@ -12,7 +13,7 @@ __inline__ __device__ void batchCopy(K *dest, K *source, U *dest_aux, U *source_
         dest_aux[i] = source_aux[i];
         if (reset)
         {
-            source[i] = init_limits;
+            source[i] = FLT_MAX;
             source_aux[i] = -1;
         }
     }
