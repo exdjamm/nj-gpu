@@ -217,7 +217,7 @@ public:
         cudaMemcpy(&h_partialBufferSize, partialBufferSize, sizeof(int), cudaMemcpyDeviceToHost);
 
         int *h_status = new int[h_batchCount + 1];
-        K *h_items = new K[batchSize * (h_batchCount + 1)];
+        U *h_items = new K[batchSize * (h_batchCount + 1)];
         cudaMemcpy(h_items, auxItems, sizeof(K) * batchSize * (h_batchCount + 1), cudaMemcpyDeviceToHost);
         cudaMemcpy(h_status, status, sizeof(int) * (h_batchCount + 1), cudaMemcpyDeviceToHost);
 
