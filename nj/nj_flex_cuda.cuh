@@ -35,8 +35,8 @@ __device__ void pushEliminetedToEndPositions(int *positions, int size);
 
 __global__ void initPositionsData(int *positions, int *collect_number, int size);
 
-__global__ void buildQUHeap(nj_data_t d, UHeap<float, int> *heap, int batchSize);
-__global__ void getPositionsBatch(UHeap<float, int> *heap, int *result, int N, int batchSize);
+__global__ void buildQUHeap(nj_data_t d, UHeap<float, int> *heap, float *batchQ, int *batchPositions, int batchSize);
+__global__ void getPositionsBatch(UHeap<float, int> *heap, float *batchQ, int *batchPositions, int N, int batchSize);
 
 /*
  Compare positions already selected with a new positions batch. Those it was not filtered,
@@ -78,37 +78,24 @@ __global__ void consolidationOfPositions(int *positions, int *new_positions, int
     __syncthreads();
 }
 
-__global__ void buildQUHeap(nj_data_t d, UHeap<float, int> *heap, int batchSize)
+__global__ void buildQUHeap(nj_data_t d, UHeap<float, int> *heap, float *batchQ, int *batchPositions, int batchSize)
 {
-    extern __shared__ int sm[];
-    int sizeQ = batchSize;
-    int sizePositions = batchSize;
-    int smOffset = sizeQ + sizePositions;
-
-    float *Q = (float *)&sm[0];
-    int *positions = (int *)&Q[sizeQ];
+    int smOffset = 0;
 
     int d_size = d.N * (d.N) / 2;
     int batchNeeded = (d_size + batchSize - 1) / batchSize;
 
     for (int idxInsertion = blockIdx.x; idxInsertion < batchNeeded; idxInsertion += gridDim.x)
     {
-        buildQPositions(d, Q, positions, idxInsertion * batchSize, batchSize, d_size);
-        heap->insertion(Q, positions, batchSize, smOffset);
+        buildQPositions(d, batchQ, batchPositions, idxInsertion * batchSize, batchSize, d_size);
+        heap->insertion(batchQ, batchPositions, batchSize, smOffset);
         __syncthreads();
     }
 }
 
-__global__ void getPositionsBatch(UHeap<float, int> *heap, int *result, int N, int batchSize)
+__global__ void getPositionsBatch(UHeap<float, int> *heap, float *batchQ, int *batchPositions, int N, int batchSize)
 {
-    // ONLY ONE BLOCK PER KERNEL EXECTION
-    extern __shared__ int sm[];
-    int sizeQ = batchSize;
-    int sizePositions = batchSize;
-    int smOffset = sizeQ + sizePositions;
-
-    float *Q = (float *)&sm[0];
-    int *positions = (int *)&Q[sizeQ];
+    int smOffset = 0;
 
     int batchNeeded = 1;
     int outSize = 0;
@@ -117,7 +104,7 @@ __global__ void getPositionsBatch(UHeap<float, int> *heap, int *result, int N, i
     {
 
         // delete items from heap
-        if (heap->deleteRoot(Q, positions, outSize) == true)
+        if (heap->deleteRoot(batchQ, batchPositions, outSize) == true)
         {
             __syncthreads();
 
@@ -133,13 +120,6 @@ __global__ void getPositionsBatch(UHeap<float, int> *heap, int *result, int N, i
     // pushEliminetedToEnd(Q, positions, N, batchSize);
     // __syncthreads();
 
-    if (blockIdx.x == 0)
-    {
-        for (int i = threadIdx.x; i < batchSize; i += blockDim.x)
-        {
-            result[i] = positions[i];
-        }
-    }
     __syncthreads();
 }
 
@@ -340,9 +320,6 @@ __device__ void pushEliminetedToEnd(float *Q, int *positions, int N, int size)
 
 __device__ void nonUniqueFilter(int *positions, int N, int size, int smOffset)
 {
-    int i_pos1, i_pos2;
-    int j_pos1, j_pos2;
-
     __shared__ extern int sm[];
     int *excludePositions = (int *)&sm[smOffset];
 
