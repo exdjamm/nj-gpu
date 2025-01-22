@@ -2,6 +2,8 @@
 
 #include <cuda_runtime.h>
 
+#define NJ
+
 #include "./nj_read/nj_read.cuh"
 
 #include "./nj/nj_flex_heap.cuh"

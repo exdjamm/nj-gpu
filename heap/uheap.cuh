@@ -381,6 +381,9 @@ public:
         __syncthreads();
 
         size = batchSize;
+#ifdef NJ
+        deleteOffset = 0;
+#endif
         batchCopy(items + deleteOffset, heapItems + batchSize,
                   aux_items + deleteOffset, auxItems + batchSize,
                   size);
