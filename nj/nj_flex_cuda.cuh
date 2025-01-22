@@ -35,7 +35,7 @@ __device__ void pushEliminetedToEndPositions(int *positions, int size);
 
 __global__ void initPositionsData(int *positions, int *collect_number, int size);
 
-__global__ void buildQUHeap(nj_data_t d, UHeap<float, int> *heap, float *batchQ, int *batchPositions, int batchSize);
+__global__ void buildQUHeap(nj_data_t d, UHeap<float, int> *heap, int batchSize);
 __global__ void getPositionsBatch(UHeap<float, int> *heap, float *batchQ, int *batchPositions, int N, int batchSize);
 
 /*
@@ -78,9 +78,13 @@ __global__ void consolidationOfPositions(int *positions, int *new_positions, int
     __syncthreads();
 }
 
-__global__ void buildQUHeap(nj_data_t d, UHeap<float, int> *heap, float *batchQ, int *batchPositions, int batchSize)
+// utilizar shared mem é melhor se quiser realizar varias entradas em blocos diferentes, usando a global so pode um!
+__global__ void buildQUHeap(nj_data_t d, UHeap<float, int> *heap, int batchSize)
 {
-    int smOffset = 0;
+    extern __shared__ int sm[];
+    float *batchQ = (float *)&sm[0];
+    int *batchPositions = (int *)&batchQ[batchSize];
+    int smOffset = 2 * batchSize;
 
     int d_size = d.N * (d.N) / 2;
     int batchNeeded = (d_size + batchSize - 1) / batchSize;
