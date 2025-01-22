@@ -89,7 +89,7 @@ __global__ void buildQUHeap(nj_data_t d, UHeap<float, int> *heap, int batchSize)
     int *positions = (int *)&Q[sizeQ];
 
     int d_size = d.N * (d.N) / 2;
-    int batchNeeded = d_size / batchSize;
+    int batchNeeded = (d_size + batchSize - 1) / batchSize;
 
     for (int idxInsertion = blockIdx.x; idxInsertion < batchNeeded; idxInsertion += gridDim.x)
     {
