@@ -83,6 +83,8 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
                     if (hasIntersection(h_result[i], h_result[j], d.N))
                         h_result[j] = -1;
 
+            cudaMemcpy(d_result, h_result, sizeof(int) * batchSize, cudaMemcpyHostToDevice);
+
 #ifdef DEBUG
             printf("[");
             for (int index_result_loop = 0; index_result_loop < batchSize; index_result_loop++)
@@ -90,9 +92,7 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
                 printf("\t %d, (%d, %d),  ", h_result[index_result_loop], h_result[index_result_loop] / d.N, h_result[index_result_loop] % d.N);
             }
             printf("]\n");
-
 #endif
-
             consolidationOfPositions<<<1, threads_per_block>>>(d_positions, d_result, d_collected_number, pair_number, batchSize, d.N);
             gpuErrchk(cudaPeekAtLastError());
 
