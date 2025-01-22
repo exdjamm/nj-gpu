@@ -376,8 +376,8 @@ __device__ void nonUniqueFilter(int *positions, int N, int size, int smOffset)
             }
         }
     }
-
-    for (int i = threadIdx.x; i < size; i += blockIdx.x)
+    __syncthreads();
+    for (int i = threadIdx.x; i < size; i += blockDim.x)
     {
         if (excludePositions[i] == -1)
         {
