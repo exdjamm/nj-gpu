@@ -428,6 +428,10 @@ public:
         if (threadIdx.x == 0)
         {
             int lstatus = INUSE;
+            if (lastIdx >= (batchNum + 1))
+            {
+                printf("====== !!!!!! ERROR !!!!! [%d] =======\n", lastIdx);
+            }
             while (lstatus == INUSE)
             {
                 lstatus = atomicMax(&status[lastIdx], INUSE);
