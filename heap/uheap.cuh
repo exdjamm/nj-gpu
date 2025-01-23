@@ -477,6 +477,10 @@ public:
             int leftIdx = getReversedIdx(getReversedIdx(currentIdx) << 1);
             int rightIdx = getReversedIdx(getReversedIdx(leftIdx) + 1);
             int leftPrevStatus = INUSE, rightPrevStatus = INUSE;
+
+            if (leftIdx >= (batchNum + 1) || rightIdx >= (batchNum + 1))
+                return;
+
             if (threadIdx.x == 0)
             {
                 while (leftPrevStatus == INUSE)
