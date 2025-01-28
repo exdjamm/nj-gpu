@@ -13,7 +13,7 @@ __inline__ __device__ void batchCopy(K *dest, K *source, U *dest_aux, U *source_
         dest_aux[i] = source_aux[i];
         if (reset)
         {
-            source[i] = FLT_MAX;
+            source[i] = init_limits;
             source_aux[i] = -1;
         }
     }
