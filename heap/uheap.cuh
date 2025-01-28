@@ -476,7 +476,7 @@ public:
             int leftPrevStatus = INUSE, rightPrevStatus = INUSE;
 
             if (leftIdx >= (batchNum + 1) || rightIdx >= (batchNum + 1))
-                return;
+                break;
 
             if (threadIdx.x == 0)
             {
