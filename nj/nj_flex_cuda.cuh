@@ -436,12 +436,12 @@ __inline__ __device__ float calc_q(nj_data_t d, int position)
 
 __global__ void initPositionsData(int *positions, int *collect_number, int size)
 {
-    for (int i = threadIdx.x; i < size; i += blockDim.x)
+    for (int i = threadIdx.x + blockIdx.x * blockDim.x; i < size; i += blockDim.x * gridDim.x)
     {
         positions[i] = -1;
     }
 
-    if (threadIdx.x == 0)
+    if (threadIdx.x + blockDim.x * blockIdx.x == 0)
         *collect_number = 0;
 }
 
