@@ -14,7 +14,7 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
     int pair_number = d.N * d.p;
     if (pair_number == 0)
         pair_number = 1;
-    int gridMatrix, gridArray;
+    int gridMatrix, gridArray, gridPairNumber;
 
     int *h_result;
     int *h_positions, *d_positions;
@@ -27,14 +27,15 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
     size_t sMemSize;
 
     size_array = d.N * (d.N) / 2;
-    batchNum = 512 * 1024;
     batchSize = 1024;
+    batchNum = 1024 * 512;
 
     sMemSize = batchSize * 4 * sizeof(float) + batchSize * 4 * sizeof(int);
     sMemSize += /* (threads_per_block + 1) * sizeof(int) + */ 2 * batchSize * sizeof(float) + 2 * batchSize * sizeof(int);
 
     gridMatrix = (size_array + threads_per_block - 1) / threads_per_block;
     gridArray = (d.N + threads_per_block - 1) / threads_per_block;
+    gridPairNumber = (pair_number + threads_per_block - 1) / threads_per_block;
 
     run = d.N >= 3;
 
@@ -65,7 +66,7 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
         d_ResetHeap<<<32, threads_per_block>>>(d_heap);
         gpuErrchk(cudaPeekAtLastError());
 
-        initPositionsData<<<1, threads_per_block>>>(d_positions, d_collected_number, pair_number);
+        initPositionsData<<<gridPairNumber, threads_per_block>>>(d_positions, d_collected_number, pair_number);
         gpuErrchk(cudaPeekAtLastError());
 
         buildQUHeap<<<32, threads_per_block, sMemSize>>>(d, d_heap, batchSize);
