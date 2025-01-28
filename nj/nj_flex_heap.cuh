@@ -54,6 +54,9 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
     cudaMalloc(&d_positions, sizeof(int) * pair_number);
     cudaMalloc(&d_collected_number, sizeof(int));
 
+    d_ResetHeap<<<32, threads_per_block>>>(d_heap);
+    gpuErrchk(cudaPeekAtLastError());
+
     while (run)
     {
         pair_number = d.N * d.p;
@@ -63,8 +66,6 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
         h_collect_number = 0;
 
         h_heap.reset();
-        d_ResetHeap<<<32, threads_per_block>>>(d_heap);
-        gpuErrchk(cudaPeekAtLastError());
 
         initPositionsData<<<gridPairNumber, threads_per_block>>>(d_positions, d_collected_number, pair_number);
         gpuErrchk(cudaPeekAtLastError());
