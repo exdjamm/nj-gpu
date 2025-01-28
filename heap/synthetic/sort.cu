@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
     int batchSize = 1024;
 
     arrayNum = ((arrayNum + batchSize - 1) / batchSize) * batchSize;
-    batchNum = 512 * 1024;
+    batchNum = (arrayNum + batchSize - 1) / batchSize;
 
     int *oriItems = new int[arrayNum];
 
