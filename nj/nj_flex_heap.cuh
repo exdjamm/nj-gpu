@@ -6,6 +6,8 @@
 #include "nj_cuda.cuh"
 #include "nj_flex_cuda.cuh"
 
+#include <time_debug.cuh>
+
 void nj_flex_heap(nj_data_t d, int threads_per_block);
 
 void nj_flex_heap(nj_data_t d, int threads_per_block)
@@ -38,9 +40,10 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
     gridPairNumber = (pair_number + threads_per_block - 1) / threads_per_block;
 
     run = d.N >= 3;
-
+    i_time("HEAP ALLOC", 2, 3);
     UHeap<float, int> h_heap(batchNum, batchSize, FLT_MAX, -1);
     UHeap<float, int> *d_heap;
+    f_time(3);
 
     h_result = (int *)calloc(sizeof(int), batchSize);
     h_positions = (int *)calloc(sizeof(int), pair_number);
@@ -54,9 +57,7 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
     cudaMalloc(&d_positions, sizeof(int) * pair_number);
     cudaMalloc(&d_collected_number, sizeof(int));
 
-    d_ResetHeap<<<32, threads_per_block>>>(d_heap);
-    gpuErrchk(cudaPeekAtLastError());
-
+    i_time("LOOP", 0, 4);
     while (run)
     {
         pair_number = d.N * d.p;
@@ -65,14 +66,24 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
 
         h_collect_number = 0;
 
+        i_time("HEAP RESET", 4, 5);
         h_heap.reset();
 
+        d_ResetHeap<<<32, threads_per_block>>>(d_heap);
+        gpuErrchk(cudaPeekAtLastError());
+        f_time(5);
+
+        i_time("CLEAR POSITIONS", 4, 6);
         initPositionsData<<<gridPairNumber, threads_per_block>>>(d_positions, d_collected_number, pair_number);
         gpuErrchk(cudaPeekAtLastError());
+        f_time(6);
 
+        i_time("BUILD Q HEAP", 4, 7);
         buildQUHeap<<<32, threads_per_block, sMemSize>>>(d, d_heap, batchSize);
         gpuErrchk(cudaPeekAtLastError());
+        f_time(7);
 
+        i_time("FILTER&COLLECT", 4, 8);
         while (h_collect_number < pair_number)
         {
 
@@ -96,11 +107,13 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
 
             cudaMemcpy(&h_collect_number, d_collected_number, sizeof(int), cudaMemcpyDeviceToHost);
         }
+        f_time(8);
 
         // updateDK<<<1, threads_per_block>>>(d, d_positions, pair_number);
 
         cudaMemcpy(h_positions, d_positions, sizeof(int) * pair_number, cudaMemcpyDeviceToHost);
 
+        i_time("UPDATE&RESIZE", 4, 9);
         for (int i = 0; i < pair_number; i++)
         {
             updateD<<<gridArray, threads_per_block>>>(d, h_positions[i]);
@@ -114,6 +127,7 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
         }
 
         gpuErrchk(cudaDeviceSynchronize());
+        f_time(9);
 
         d.N -= (int)(pair_number);
         size_array = d.N * (d.N) / 2;
@@ -123,6 +137,7 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
 
         run = d.N >= 3;
     }
+    f_time(4);
 
     free(h_result);
     free(h_positions);

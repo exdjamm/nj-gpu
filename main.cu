@@ -4,6 +4,8 @@
 
 #define NJ
 
+#include <time_debug.cuh>
+
 #include "./nj_read/nj_read.cuh"
 
 #include "./nj/nj_flex_heap.cuh"
@@ -14,7 +16,7 @@
 
 int main(int argc, char const *argv[])
 {
-
+    i_time("MAIN", -1, 0);
     if (argc != 5)
     {
         printf("Arguments in the form: [file] [type] [p] [TPB]\n");
@@ -31,14 +33,16 @@ int main(int argc, char const *argv[])
 
     nj_read_t read;
     nj_data_t data;
+    i_time("READFILE&DEVICE", 0, 1);
     nj_read_init(&read);
 
     nj_read_file(&read, file);
 
     data = nj_data_to_device(read, p_value, 0);
+    f_time(1);
 
     time_start();
-
+    i_time("EXEC", 0, 2);
     if (type == 0) // NJ
     {
         nj_normal(data, TPB);
@@ -52,10 +56,14 @@ int main(int argc, char const *argv[])
     {
         nj_flex_heap(data, TPB);
     }
-
+    f_time(2);
     time_end();
 
     printf("%d; %.4f;\n", read.N, elapsed_time);
+
+    f_time(0);
+
+    time_print(0, 0);
 
     free_nj_data_device(data);
     free_nj_read(read);
