@@ -29,6 +29,9 @@ void i_time(const char *name, int father, int id)
     info.size += 1;
 
     strncpy(info.names[id], name, 15);
+    cudaEventCreate(&info.start[id]);   // # Irá marcar o inicio da execucao
+    cudaEventCreate(&info.end[id]);     // # Irá  marcar o final da execucao
+    cudaEventRecord(info.start[id], 0); // # insere na fila
 
     if (father == -1)
         return;
@@ -49,10 +52,6 @@ void i_time(const char *name, int father, int id)
         info.child_size[father] += 1;
         info.child[father][idx_child] = id;
     }
-
-    cudaEventCreate(&info.start[id]);   // # Irá marcar o inicio da execucao
-    cudaEventCreate(&info.end[id]);     // # Irá  marcar o final da execucao
-    cudaEventRecord(info.start[id], 0); // # insere na fila
 }
 
 void f_time(int id)
@@ -72,7 +71,7 @@ void time_print(int id, int t)
         printf("\t");
     }
 
-    printf("%s - %.2f\n", info.names[id], info.stime[id] / (float)CLOCKS_PER_SEC);
+    printf("%s - %.2f\n", info.names[id], info.stime[id]);
 
     for (int i = 0; i < info.child_size[id]; i++)
     {
