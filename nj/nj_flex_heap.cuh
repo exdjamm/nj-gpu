@@ -92,17 +92,17 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
                                                                   d.N, batchSize);
             gpuErrchk(cudaPeekAtLastError());
 
-            cudaMemcpy(h_result, d_batchPositions, sizeof(int) * batchSize, cudaMemcpyDeviceToHost);
             f_time(10);
+            // cudaMemcpy(h_result, d_batchPositions, sizeof(int) * batchSize, cudaMemcpyDeviceToHost);
 
             i_time("CLEAN POS DEV", 8, 11);
-            for (int i = 0; i < batchSize; i++)
+            clearBatchPositions<<<1, threads_per_block>>>(d_batchPositions, batchSize, d.N);
+            /* for (int i = 0; i < batchSize; i++)
                 for (int j = i + 1; j < batchSize; j++)
                     if (hasIntersection(h_result[i], h_result[j], d.N))
-                        if (h_positions[i] != -1 && h_positions[j] != -1)
-                            h_result[j] = -1;
+                        h_result[j] = -1;
 
-            cudaMemcpy(d_batchPositions, h_result, sizeof(int) * batchSize, cudaMemcpyHostToDevice);
+            cudaMemcpy(d_batchPositions, h_result, sizeof(int) * batchSize, cudaMemcpyHostToDevice); */
             f_time(11);
 
             i_time("CONSOLIDATION", 8, 12);
