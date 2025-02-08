@@ -475,8 +475,16 @@ public:
             int rightIdx = getReversedIdx(getReversedIdx(leftIdx) + 1);
             int leftPrevStatus = INUSE, rightPrevStatus = INUSE;
 
+#ifdef NJ
+
             if (leftIdx >= (lastIdx) || rightIdx >= (lastIdx))
                 break;
+
+#else
+
+            if (leftIdx >= (batchNum + 1) || rightIdx >= (batchNum + 1))
+                break;
+#endif
 
             if (threadIdx.x == 0)
             {
