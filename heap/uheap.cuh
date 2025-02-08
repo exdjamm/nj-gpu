@@ -475,7 +475,7 @@ public:
             int rightIdx = getReversedIdx(getReversedIdx(leftIdx) + 1);
             int leftPrevStatus = INUSE, rightPrevStatus = INUSE;
 
-            if (leftIdx >= (batchNum + 1) || rightIdx >= (batchNum + 1))
+            if (leftIdx >= (lastIdx) || rightIdx >= (lastIdx))
                 break;
 
             if (threadIdx.x == 0)

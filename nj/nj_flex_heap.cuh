@@ -69,8 +69,8 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
         i_time("HEAP RESET", 4, 5);
         h_heap.reset();
 
-        d_ResetHeap<<<32, threads_per_block>>>(d_heap);
-        gpuErrchk(cudaPeekAtLastError());
+        // d_ResetHeap<<<32, threads_per_block>>>(d_heap);
+        // gpuErrchk(cudaPeekAtLastError());
         f_time(5);
 
         i_time("CLEAR POSITIONS", 4, 6);
