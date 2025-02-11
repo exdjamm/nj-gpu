@@ -43,6 +43,10 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
     i_time("HEAP ALLOC", 2, 3);
     UHeap<float, int> h_heap(batchNum, batchSize, FLT_MAX, -1);
     UHeap<float, int> *d_heap;
+
+    d_ResetHeap<<<32, threads_per_block>>>(d_heap);
+    gpuErrchk(cudaPeekAtLastError());
+
     f_time(3);
 
     h_result = (int *)calloc(sizeof(int), batchSize);
