@@ -13,6 +13,7 @@ struct time_info
     float stime[256];
     cudaEvent_t start[256];
     cudaEvent_t end[256];
+    int count[256];
     int child[256][16];
     int child_size[256];
     int size;

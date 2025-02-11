@@ -17,6 +17,7 @@ void init_time()
     {
         info.child_size[i] = 0;
         info.stime[i] = 0;
+        info.count[i] = 0;
     }
 }
 
@@ -61,6 +62,7 @@ void f_time(int id)
     cudaEventSynchronize(info.end[id]);                                // # espera terminar
     cudaEventElapsedTime(&elapsed_time, info.start[id], info.end[id]); // # calcula
     info.stime[id] += elapsed_time;
+    info.count[id] += 1;
 }
 
 void time_print(int id, int t)
@@ -71,7 +73,7 @@ void time_print(int id, int t)
         printf("\t");
     }
 
-    printf("%s - %.2f\n", info.names[id], info.stime[id]);
+    printf("%s - %.2f ms, %d executions\n", info.names[id], info.stime[id], info.count[id]);
 
     for (int i = 0; i < info.child_size[id]; i++)
     {
