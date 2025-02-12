@@ -8,9 +8,9 @@
 
 #include <time_debug.cuh>
 
-void nj_flex_heap(nj_data_t d, int threads_per_block);
+void nj_flex_heap(nj_data_t d, int threads_per_block, int N_STOP);
 
-void nj_flex_heap(nj_data_t d, int threads_per_block)
+void nj_flex_heap(nj_data_t d, int threads_per_block, int N_STOP)
 {
     int size_array, run;
     int pair_number = d.N * d.p;
@@ -39,7 +39,7 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
     gridArray = (d.N + threads_per_block - 1) / threads_per_block;
     gridPairNumber = (pair_number + threads_per_block - 1) / threads_per_block;
 
-    run = d.N >= 3;
+    run = d.N >= N_STOP;
     i_time("HEAP ALLOC", 2, 3);
     UHeap<float, int> h_heap(batchNum, batchSize, FLT_MAX, -1);
     UHeap<float, int> *d_heap;
@@ -142,7 +142,7 @@ void nj_flex_heap(nj_data_t d, int threads_per_block)
         gridMatrix = (size_array + threads_per_block - 1) / threads_per_block;
         gridArray = (d.N + threads_per_block - 1) / threads_per_block;
 
-        run = d.N >= 3;
+        run = d.N >= N_STOP;
     }
     f_time(4);
 

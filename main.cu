@@ -54,7 +54,13 @@ int main(int argc, char const *argv[])
     }
     else if (type == 2) // FNJ - kHeap
     {
-        nj_flex_heap(data, TPB);
+        nj_flex_heap(data, TPB, 3);
+    }
+    else if (type == 3)
+    {
+        nj_flex_heap(data, TPB, 128);
+        nj_data_host_t data_host = nj_data_to_host_pointer(data);
+        // TODO: Include code for flex cpu
     }
     f_time(2);
     time_end();

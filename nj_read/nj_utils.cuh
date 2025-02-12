@@ -27,6 +27,20 @@ struct nj_data
 };
 typedef struct nj_data nj_data_t;
 
+struct nj_data_host
+{
+    float *D;
+    float *Q;
+    float *S;
+    int *positions;
+
+    int N;
+    int stride;
+    float p;
+    int k;
+};
+typedef struct nj_data_host nj_data_host_t;
+
 /*
 As matrizes em memoria estao no formato triangular em um vetor linear,
 com a posicao do vetor dada por i*(i-1)/2 + j, para i > j.
