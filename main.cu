@@ -64,6 +64,11 @@ int main(int argc, char const *argv[])
         nj_data_t data_host = nj_data_to_host_pointer(data);
         fnj_heap_cpu(data_host);
     }
+    else if (type == 4)
+    {
+        nj_data_t data_host = nj_data_to_host_pointer(data);
+        fnj_heap_cpu(data_host);
+    }
     f_time(2);
     time_end();
 
