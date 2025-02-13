@@ -11,6 +11,7 @@
 #include "./nj/nj_flex_heap.cuh"
 #include "./nj/nj_flex.cuh"
 #include "./nj/nj_normal.cuh"
+#include "./nj/fnj_heap_cpu.cuh"
 
 #include "./time_analisys.cuh"
 
@@ -29,7 +30,8 @@ int main(int argc, char const *argv[])
     // int k_number = atoi(argv[4]);
     int TPB = atoi(argv[4]);
 
-    printf("%s, %d, %.3f, %d\n", file, type, p_value, 0);
+    printf("file; execution type; p_value; n otus; time (ms)\n");
+    printf("%s; %d; %.3f;", file, type, p_value);
 
     nj_read_t read;
     nj_data_t data;
@@ -60,7 +62,7 @@ int main(int argc, char const *argv[])
     {
         nj_flex_heap(data, TPB, 128);
         nj_data_host_t data_host = nj_data_to_host_pointer(data);
-        // TODO: Include code for flex cpu
+        fnj_heap_cpu(data_host);
     }
     f_time(2);
     time_end();
