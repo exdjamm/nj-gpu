@@ -61,7 +61,7 @@ int main(int argc, char const *argv[])
     else if (type == 3)
     {
         nj_flex_heap(data, TPB, 128);
-        nj_data_host_t data_host = nj_data_to_host_pointer(data);
+        nj_data_t data_host = nj_data_to_host_pointer(data);
         fnj_heap_cpu(data_host);
     }
     f_time(2);

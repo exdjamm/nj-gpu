@@ -16,7 +16,7 @@ nj_data_t nj_data_to_device(nj_read_t r, float p, int k);
 /*
  Copia os valores das variaveis de device para as variaveis de host.
 */
-nj_data_host_t nj_data_to_host_pointer(nj_data_t d);
+nj_data_t nj_data_to_host_pointer(nj_data_t d);
 
 void nj_read_init(nj_read_t *r)
 {
@@ -94,9 +94,9 @@ nj_data_t nj_data_to_device(nj_read_t r, float p, int k)
     return d_data;
 }
 
-nj_data_host_t nj_data_to_host_pointer(nj_data_t d)
+nj_data_t nj_data_to_host_pointer(nj_data_t d)
 {
-    nj_data_host_t d_data;
+    nj_data_t d_data;
     size_t size_matrix = d.N * (d.N) / 2;
     size_t size_select_otus = d.p * d.N;
 
@@ -124,7 +124,7 @@ void free_nj_data_device(nj_data_t d)
     cudaFree(d.positions);
 }
 
-void free_nj_data_host(nj_data_host_t d)
+void free_nj_data_host(nj_data_t d)
 {
     free(d.D);
     free(d.S);

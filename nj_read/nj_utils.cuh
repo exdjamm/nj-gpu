@@ -27,20 +27,6 @@ struct nj_data
 };
 typedef struct nj_data nj_data_t;
 
-struct nj_data_host
-{
-    float *D;
-    float *Q;
-    float *S;
-    int *positions;
-
-    int N;
-    int stride;
-    float p;
-    int k;
-};
-typedef struct nj_data_host nj_data_host_t;
-
 /*
 As matrizes em memoria estao no formato triangular em um vetor linear,
 com a posicao do vetor dada por i*(i-1)/2 + j, para i > j.
@@ -73,21 +59,21 @@ __host__ void set_array_position(nj_read_t r, int i, int j, float value);
 /*
 Set value in device Matrix D struct nj_data array.
 */
-__device__ void d_set_D_position(nj_data_t d, int i, int j, float value);
+__device__ __host__ void d_set_D_position(nj_data_t d, int i, int j, float value);
 
 /*
 Get value in device Matrix D struct nj_data array.
 */
-__device__ float d_get_D_position(nj_data_t d, int i, int j);
+__device__ __host__ float d_get_D_position(nj_data_t d, int i, int j);
 
 /*
 Set value in device Matrix Q struct nj_data array.
 */
-__device__ void d_set_Q_position(nj_data_t d, int i, int j, float value);
+__device__ __host__ void d_set_Q_position(nj_data_t d, int i, int j, float value);
 /*
 Get value in device Matrix Q struct nj_data array.
 */
-__device__ float d_get_Q_position(nj_data_t d, int i, int j);
+__device__ __host__ float d_get_Q_position(nj_data_t d, int i, int j);
 
 __device__ __host__ int otu_to_mem_position(int i, int j)
 {
@@ -158,7 +144,7 @@ __host__ void set_array_position(nj_read_t r, int i_otu, int j_otu, float value)
     r.D[pos] = value;
 }
 
-__device__ void d_set_D_position(nj_data_t d, int i_otu, int j_otu, float value)
+__device__ __host__ void d_set_D_position(nj_data_t d, int i_otu, int j_otu, float value)
 {
     int pos = otu_to_mem_position(i_otu, j_otu);
 
@@ -171,7 +157,7 @@ __device__ void d_set_D_position(nj_data_t d, int i_otu, int j_otu, float value)
 
     d.D[pos] = value;
 }
-__device__ float d_get_D_position(nj_data_t d, int i_otu, int j_otu)
+__device__ __host__ float d_get_D_position(nj_data_t d, int i_otu, int j_otu)
 {
     int pos = otu_to_mem_position(i_otu, j_otu);
 
@@ -185,13 +171,13 @@ __device__ float d_get_D_position(nj_data_t d, int i_otu, int j_otu)
     return d.D[pos];
 }
 
-__device__ void d_set_Q_position(nj_data_t d, int i_otu, int j_otu, float value)
+__device__ __host__ void d_set_Q_position(nj_data_t d, int i_otu, int j_otu, float value)
 {
     int pos = otu_to_mem_position(i_otu, j_otu);
 
     d.Q[pos] = value;
 }
-__device__ float d_get_Q_position(nj_data_t d, int i_otu, int j_otu)
+__device__ __host__ float d_get_Q_position(nj_data_t d, int i_otu, int j_otu)
 {
     if (i_otu >= d.N || j_otu >= d.N)
         return FLT_MAX;
