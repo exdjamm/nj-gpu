@@ -108,7 +108,7 @@ nj_data_t nj_data_to_host_pointer(nj_data_t d)
     d_data.D = (float *)calloc(size_matrix, sizeof(float));
     d_data.Q = (float *)calloc(size_matrix, sizeof(float));
     d_data.S = (float *)calloc(d.N, sizeof(float));
-    d_data.positions = NULL;
+    d_data.positions = (int *)calloc(size_matrix, sizeof(int));
 
     cudaMemcpy(d_data.D, d.D, sizeof(float) * size_matrix, cudaMemcpyDeviceToHost);
     cudaMemcpy(d_data.S, d.S, sizeof(float) * d.N, cudaMemcpyDeviceToHost);
