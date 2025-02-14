@@ -1,4 +1,4 @@
-nvcc = nvcc
+nvcc = /usr/local/cuda-12.4/bin/nvcc
 nvccflag = -std=c++11 -O3 -arch=sm_61 -DHEAP_SORT
 heappath = ./heap
 timedebugpath = ./
