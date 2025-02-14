@@ -8,7 +8,7 @@
 
 #include <time_debug.cuh>
 
-void nj_flex_heap(nj_data_t d, int threads_per_block, int N_STOP);
+void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP);
 
 void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
 {
