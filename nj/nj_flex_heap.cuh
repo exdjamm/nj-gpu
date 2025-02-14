@@ -47,9 +47,6 @@ void nj_flex_heap(nj_data_t d, int threads_per_block, int N_STOP)
     cudaMalloc((void **)&d_heap, sizeof(UHeap<float, int>));
     cudaMemcpy(d_heap, &h_heap, sizeof(UHeap<float, int>), cudaMemcpyHostToDevice);
 
-    d_ResetHeap<<<32, threads_per_block>>>(d_heap);
-    gpuErrchk(cudaPeekAtLastError());
-
     f_time(3);
 
     h_result = (int *)calloc(sizeof(int), batchSize);
@@ -72,6 +69,8 @@ void nj_flex_heap(nj_data_t d, int threads_per_block, int N_STOP)
 
         i_time("HEAP RESET", 4, 5);
         h_heap.reset();
+        d_ResetHeap<<<32, threads_per_block>>>(d_heap);
+        gpuErrchk(cudaPeekAtLastError());
         f_time(5);
 
         i_time("CLEAR POSITIONS", 4, 6);

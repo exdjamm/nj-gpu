@@ -474,17 +474,18 @@ public:
             int leftIdx = getReversedIdx(getReversedIdx(currentIdx) << 1);
             int rightIdx = getReversedIdx(getReversedIdx(leftIdx) + 1);
             int leftPrevStatus = INUSE, rightPrevStatus = INUSE;
+            __syncthreads();
+            /*             // O IDEAL SERIA UTILIZAR UM ATOMIC OPERATOR PARA SINCRONIZAR AS THREADS
+            #ifdef NJ
+                        // A CHANCE DE HALT AUMENTA DEMAIS USANDO ESSE
+                        if (leftIdx >= (lastIdx) || rightIdx >= (lastIdx))
+                            break;
 
-#ifdef NJ
-
-            if (leftIdx >= (lastIdx) || rightIdx >= (lastIdx))
-                break;
-
-#else
-
+            #else */
+            // USANDO ESSE, PODE SER QUE TENHAS VALORES JA DESCARTADOS NO HEAP
             if (leftIdx >= (batchNum + 1) || rightIdx >= (batchNum + 1))
                 break;
-#endif
+            /* #endif */
 
             if (threadIdx.x == 0)
             {
