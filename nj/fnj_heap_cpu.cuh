@@ -39,7 +39,7 @@ void fnj_heap_cpu(nj_data_t data)
         {
             for (int j = i; j < data.N; j++)
             {
-                int pos = i * i + j;
+                int pos = i * (i - 1) / 2 + j;
                 d_ij = d_get_D_position(data, i, j);
                 value_q = d_ij * (data.N - 2) - data.S[i] - data.S[j];
 
