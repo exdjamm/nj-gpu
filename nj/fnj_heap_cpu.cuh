@@ -37,7 +37,7 @@ void fnj_heap_cpu(nj_data_t data)
         // Set Q-Matrix
         for (int i = 0; i < data.N; i++)
         {
-            for (int j = i; j < data.N; j++)
+            for (int j = 0; j < i; j++)
             {
                 int pos = i * (i - 1) / 2 + j;
                 d_ij = d_get_D_position(data, i, j);
@@ -107,6 +107,8 @@ void fnj_heap_cpu(nj_data_t data)
         if (!run)
             break;
     }
+
+    free(pairs);
 }
 
 void update_d(nj_data_t data, int pos)
