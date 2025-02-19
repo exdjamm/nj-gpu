@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    srand(time(NULL));
+    srand(0);
 
     int testType = atoi(argv[1]);
     int arrayNum = atoi(argv[2]);
@@ -159,12 +159,23 @@ int main(int argc, char *argv[])
     // concurrent deletion
     setTime(&startTime);
 
-    deleteKernel<<<blockNum, blockSize, smemSize>>>(d_heap, heapItems, auxItems, arrayNum, batchSize);
+    deleteKernel<<<blockNum, blockSize, smemSize>>>(d_heap, heapItems, auxItems, batchSize * 3, batchSize);
     gpuErrchk(cudaPeekAtLastError());
     gpuErrchk(cudaDeviceSynchronize());
 
+    h_heap.printHeap();
+
     setTime(&endTime);
     deleteTime = getTime(&startTime, &endTime);
+
+    h_heap.reset();
+    cudaMemcpy(d_heap, &h_heap, sizeof(UHeap<int, int>), cudaMemcpyHostToDevice);
+
+    h_heap.printHeap();
+
+    insertKernel<<<blockNum, blockSize, smemSize>>>(d_heap, heapItems, auxItems, batchSize * 3, batchSize);
+
+    h_heap.printHeap();
 
     printf("%s,insdel,%d,%d,%.4f,%.4f,%.4f\n",
            "uHeap",
