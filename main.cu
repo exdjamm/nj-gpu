@@ -18,9 +18,9 @@
 int main(int argc, char const *argv[])
 {
     i_time("MAIN", -1, 0);
-    if (argc != 5)
+    if (argc != 6)
     {
-        printf("Arguments in the form: [file] [type] [p] [TPB]\n");
+        printf("Arguments in the form: [file] [type] [p] [TPB] [HEAVISIDE FNJ_CPU]\n");
         return 1;
     }
 
@@ -29,9 +29,10 @@ int main(int argc, char const *argv[])
     float p_value = atof(argv[3]);
     // int k_number = atoi(argv[4]);
     int TPB = atoi(argv[4]);
+    int hpoint_fnj_cpu = atoi(argv[5]);
 
-    printf("file; execution type; p_value; n otus; time (ms)\n");
-    printf("%s; %d; %.3f;", file, type, p_value);
+    printf("file; execution type; p_value; TPB; heaviside point; n otus; time (ms)\n");
+    printf("%s; %d; %.3f; %d; %d;", file, type, p_value, TPB, hpoint_fnj_cpu);
 
     nj_read_t read;
     nj_data_t data;
@@ -60,7 +61,7 @@ int main(int argc, char const *argv[])
     }
     else if (type == 3)
     {
-        nj_flex_heap(&data, TPB, 128);
+        nj_flex_heap(&data, TPB, hpoint_fnj_cpu);
         nj_data_t data_host = nj_data_to_host_pointer(data);
         i_time("CPU FNJ", 2, 15);
         fnj_heap_cpu(data_host);
@@ -76,7 +77,7 @@ int main(int argc, char const *argv[])
     f_time(2);
     time_end();
 
-    printf("%d; %.4f;\n", read.N, elapsed_time);
+    printf(" %d; %.4f;\n", read.N, elapsed_time);
 
     f_time(0);
 
