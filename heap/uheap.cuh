@@ -469,23 +469,22 @@ public:
 
         int currentIdx = 1;
         int curPrevStatus = AVAIL;
+        int run = 1;
+
         while (1)
         {
             int leftIdx = getReversedIdx(getReversedIdx(currentIdx) << 1);
             int rightIdx = getReversedIdx(getReversedIdx(leftIdx) + 1);
             int leftPrevStatus = INUSE, rightPrevStatus = INUSE;
             __syncthreads();
-            /*             // O IDEAL SERIA UTILIZAR UM ATOMIC OPERATOR PARA SINCRONIZAR AS THREADS
-            #ifdef NJ
-                        // A CHANCE DE HALT AUMENTA DEMAIS USANDO ESSE
-                        if (leftIdx >= (lastIdx) || rightIdx >= (lastIdx))
-                            break;
 
-            #else */
-            // USANDO ESSE, PODE SER QUE TENHAS VALORES JA DESCARTADOS NO HEAP
-            if (leftIdx >= (batchNum + 1) || rightIdx >= (batchNum + 1))
+            run = atomicCheckValidIdx(batchCount, rightIdx);
+
+            if (!run)
+            {
+                __syncthreads();
                 break;
-            /* #endif */
+            }
 
             if (threadIdx.x == 0)
             {

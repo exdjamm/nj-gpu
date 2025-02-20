@@ -4,6 +4,25 @@
 #include <cstdint>
 #include <float.h>
 
+__device__ int atomicCheckValidIdx(int *address, int compare)
+{
+    int old = *address;
+    int assumed, val;
+    int result;
+
+    do
+    {
+        assumed = old;
+        val = assumed;
+        result = compare < assumed;
+
+        old = atomicCAS(address, assumed, val);
+
+    } while (assumed != old);
+
+    return result;
+}
+
 template <typename K, typename U>
 __inline__ __device__ void batchCopy(K *dest, K *source, U *dest_aux, U *source_aux, int size, bool reset = false, K init_limits = 0)
 {
