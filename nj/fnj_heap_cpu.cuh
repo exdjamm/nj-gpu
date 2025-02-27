@@ -88,6 +88,8 @@ void fnj_heap_cpu(nj_data_t data)
             if (non_disjunct)
                 continue;
 
+            printf("%d, %d\n", out_aux / data.N, out_aux % data.N);
+
             pairs[collected] = out_aux;
             collected++;
         }

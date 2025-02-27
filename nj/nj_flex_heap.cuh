@@ -129,6 +129,7 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
         i_time("UPDATE&RESIZE", 4, 9);
         for (int i = 0; i < pair_number; i++)
         {
+            printf("%d, %d\n", h_positions[i] / d->N, h_positions[i] % d->N);
             updateD<<<gridArray, threads_per_block>>>(*d, h_positions[i]);
             gpuErrchk(cudaPeekAtLastError());
         }
