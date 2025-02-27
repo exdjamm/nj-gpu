@@ -26,4 +26,22 @@ void time_print(int id, int t);
 void i_time(const char *name, int father, int id);
 void f_time(int id);
 
+#ifdef NO_TIME
+#define TIME_POINT(name, parent, id) \
+    {                                \
+    }
+#define TIME_POINT_END(ID) \
+    {                      \
+    }
+#else
+#define TIME_POINT(name, parent, id) \
+    {                                \
+        i_time(name, parent, id);    \
+    }
+#define TIME_POINT_END(ID) \
+    {                      \
+        f_time(ID);        \
+    }
+#endif
+
 #endif
