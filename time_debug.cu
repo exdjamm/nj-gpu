@@ -67,7 +67,7 @@ void f_time(int id)
 
 void time_print(int id, int t)
 {
-#ifdef NO_TIME;
+#ifdef NO_TIME
     return;
 #endif
 
