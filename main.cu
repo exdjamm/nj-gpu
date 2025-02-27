@@ -17,7 +17,7 @@
 
 int main(int argc, char const *argv[])
 {
-    i_time("MAIN", -1, 0);
+    TIME_POINT("MAIN", -1, 0);
     if (argc != 6)
     {
         printf("Arguments in the form: [file] [type] [p] [TPB] [HEAVISIDE FNJ_CPU]\n");
@@ -36,7 +36,7 @@ int main(int argc, char const *argv[])
 
     nj_read_t read;
     nj_data_t data, data_host;
-    i_time("READFILE&DEVICE", 0, 1);
+    TIME_POINT("READFILE&DEVICE", 0, 1);
     nj_read_init(&read);
 
     nj_read_file(&read, file);
@@ -50,10 +50,10 @@ int main(int argc, char const *argv[])
         data_host = nj_data_init_host(read, p_value, 0);
     }
 
-    f_time(1);
+    TIME_POINT_END(1);
 
     time_start();
-    i_time("EXEC", 0, 2);
+    TIME_POINT("EXEC", 0, 2);
     if (type == 0) // NJ
     {
         nj_normal(data, TPB);
@@ -71,21 +71,21 @@ int main(int argc, char const *argv[])
     {
         nj_flex_heap(&data, TPB, hpoint_fnj_cpu);
         data_host = nj_data_to_host_pointer(data);
-        i_time("CPU FNJ", 2, 15);
+        TIME_POINT("CPU FNJ", 2, 15);
         fnj_heap_cpu(data_host);
-        f_time(15);
+        TIME_POINT_END(15);
     }
     else if (type == 4)
     {
         // data_host = nj_data_to_host_pointer(data);
         fnj_heap_cpu(data_host);
     }
-    f_time(2);
+    TIME_POINT_END(2);
     time_end();
 
     printf(" %d; %.4f;\n", read.N, elapsed_time);
 
-    f_time(0);
+    TIME_POINT_END(0);
 
     time_print(0, 0);
 

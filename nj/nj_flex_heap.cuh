@@ -19,6 +19,7 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
     int gridMatrix, gridArray, gridPairNumber;
 
     int *h_result;
+    float *qValues;
     int *h_positions, *d_positions;
     int h_collect_number, *d_collected_number;
     float *d_batchQ;
@@ -40,7 +41,7 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
     gridPairNumber = (pair_number + threads_per_block - 1) / threads_per_block;
 
     run = d->N >= N_STOP;
-    i_time("HEAP ALLOC", 2, 3);
+    TIME_POINT("HEAP ALLOC", 2, 3);
     UHeap<float, int> h_heap(batchNum, batchSize, FLT_MAX, -1);
     UHeap<float, int> *d_heap;
 
@@ -51,9 +52,10 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
     d_ResetHeap<<<32, threads_per_block>>>(d_heap);
     gpuErrchk(cudaPeekAtLastError());
 
-    f_time(3);
+    TIME_POINT_END(3);
 
     h_result = (int *)calloc(sizeof(int), batchSize);
+    qValues = (float *)calloc(sizeof(float), batchSize);
     h_positions = (int *)calloc(sizeof(int), pair_number);
 
     cudaMalloc(&d_batchQ, sizeof(float) * batchSize);
@@ -62,7 +64,7 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
     cudaMalloc(&d_positions, sizeof(int) * pair_number);
     cudaMalloc(&d_collected_number, sizeof(int));
 
-    i_time("LOOP", 2, 4);
+    TIME_POINT("LOOP", 2, 4);
     while (run)
     {
         pair_number = d->N * d->p;
@@ -71,38 +73,38 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
 
         h_collect_number = 0;
 
-        i_time("HEAP RESET", 4, 5);
+        TIME_POINT("HEAP RESET", 4, 5);
         h_heap.reset();
 
 #ifdef RESET_HEAP
         d_ResetHeap<<<32, threads_per_block>>>(d_heap);
         gpuErrchk(cudaPeekAtLastError());
 #endif
-        f_time(5);
+        TIME_POINT_END(5);
 
-        i_time("CLEAR POSITIONS", 4, 6);
+        TIME_POINT("CLEAR POSITIONS", 4, 6);
         initPositionsData<<<gridPairNumber, threads_per_block>>>(d_positions, d_collected_number, pair_number);
         gpuErrchk(cudaPeekAtLastError());
-        f_time(6);
+        TIME_POINT_END(6);
 
-        i_time("BUILD Q HEAP", 4, 7);
+        TIME_POINT("BUILD Q HEAP", 4, 7);
         buildQUHeap<<<32, threads_per_block, sMemSize>>>(*d, d_heap, batchSize);
         gpuErrchk(cudaPeekAtLastError());
-        f_time(7);
+        TIME_POINT_END(7);
 
-        i_time("FILTER&COLLECT", 4, 8);
+        TIME_POINT("FILTER&COLLECT", 4, 8);
         while (h_collect_number < pair_number)
         {
-            i_time("GET POSITON HOST", 8, 10);
+            TIME_POINT("GET POSITON HOST", 8, 10);
             getPositionsBatch<<<1, threads_per_block, sMemSize>>>(d_heap,
                                                                   d_batchQ, d_batchPositions,
                                                                   d->N, batchSize);
             gpuErrchk(cudaPeekAtLastError());
 
-            f_time(10);
+            TIME_POINT_END(10);
             cudaMemcpy(h_result, d_batchPositions, sizeof(int) * batchSize, cudaMemcpyDeviceToHost);
 
-            i_time("CLEAN POS DEV", 8, 11);
+            TIME_POINT("CLEAN POS DEV", 8, 11);
             // clearBatchPositions<<<1, threads_per_block>>>(d_batchPositions, batchSize, d.N);
             for (int i = 0; i < batchSize; i++)
                 for (int j = i + 1; j < batchSize; j++)
@@ -110,23 +112,32 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
                         if (hasIntersection(h_result[i], h_result[j], d->N))
                             h_result[j] = -1;
 
-            cudaMemcpy(d_batchPositions, h_result, sizeof(int) * batchSize, cudaMemcpyHostToDevice);
-            f_time(11);
+            cudaMemcpy(qValues, d_batchQ, batchSize * sizeof(float), cudaMemcpyDeviceToHost);
 
-            i_time("CONSOLIDATION", 8, 12);
+            for (int i = 0; i < batchSize; i++)
+            {
+                if (h_result[i] == -1)
+                    continue;
+                printf("%d: (%d, %d) -> %.2f\n", d->N, h_result[i] / d->N, h_result[i] % d->N, qValues[i]);
+            }
+
+            cudaMemcpy(d_batchPositions, h_result, sizeof(int) * batchSize, cudaMemcpyHostToDevice);
+            TIME_POINT_END(11);
+
+            TIME_POINT("CONSOLIDATION", 8, 12);
             consolidationOfPositions<<<1, threads_per_block>>>(d_positions, d_batchPositions, d_collected_number, pair_number, batchSize, d->N);
             gpuErrchk(cudaPeekAtLastError());
 
             cudaMemcpy(&h_collect_number, d_collected_number, sizeof(int), cudaMemcpyDeviceToHost);
-            f_time(12);
+            TIME_POINT_END(12);
         }
-        f_time(8);
+        TIME_POINT_END(8);
 
         // updateDK<<<1, threads_per_block>>>(d, d_positions, pair_number);
 
         cudaMemcpy(h_positions, d_positions, sizeof(int) * pair_number, cudaMemcpyDeviceToHost);
 
-        i_time("UPDATE&RESIZE", 4, 9);
+        TIME_POINT("UPDATE&RESIZE", 4, 9);
         for (int i = 0; i < pair_number; i++)
         {
             printf("%d, %d\n", h_positions[i] / d->N, h_positions[i] % d->N);
@@ -141,7 +152,7 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
         }
 
         gpuErrchk(cudaDeviceSynchronize());
-        f_time(9);
+        TIME_POINT_END(9);
 
         d->N -= (int)(pair_number);
         size_array = d->N * (d->N) / 2;
@@ -151,7 +162,7 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
 
         run = d->N >= N_STOP;
     }
-    f_time(4);
+    TIME_POINT_END(4);
 
     free(h_result);
     free(h_positions);
