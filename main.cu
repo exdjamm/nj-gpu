@@ -35,13 +35,21 @@ int main(int argc, char const *argv[])
     printf("%s; %d; %.3f; %d; %d;", file, type, p_value, TPB, hpoint_fnj_cpu);
 
     nj_read_t read;
-    nj_data_t data;
+    nj_data_t data, data_host;
     i_time("READFILE&DEVICE", 0, 1);
     nj_read_init(&read);
 
     nj_read_file(&read, file);
 
-    data = nj_data_to_device(read, p_value, 0);
+    if (type != 4)
+    {
+        data = nj_data_to_device(read, p_value, 0);
+    }
+    else
+    {
+        data_host = nj_data_init_host(read, p_value, 0);
+    }
+
     f_time(1);
 
     time_start();
@@ -62,17 +70,15 @@ int main(int argc, char const *argv[])
     else if (type == 3)
     {
         nj_flex_heap(&data, TPB, hpoint_fnj_cpu);
-        nj_data_t data_host = nj_data_to_host_pointer(data);
+        data_host = nj_data_to_host_pointer(data);
         i_time("CPU FNJ", 2, 15);
         fnj_heap_cpu(data_host);
         f_time(15);
-        free_nj_data_host(data_host);
     }
     else if (type == 4)
     {
-        nj_data_t data_host = nj_data_to_host_pointer(data);
+        // data_host = nj_data_to_host_pointer(data);
         fnj_heap_cpu(data_host);
-        free_nj_data_host(data_host);
     }
     f_time(2);
     time_end();
@@ -84,6 +90,7 @@ int main(int argc, char const *argv[])
     time_print(0, 0);
 
     free_nj_data_device(data);
+    free_nj_data_host(data_host);
     free_nj_read(read);
 
     return 0;

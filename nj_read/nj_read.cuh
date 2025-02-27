@@ -18,6 +18,11 @@ nj_data_t nj_data_to_device(nj_read_t r, float p, int k);
 */
 nj_data_t nj_data_to_host_pointer(nj_data_t d);
 
+/*
+ Inicia os valores das variaveis do host.
+*/
+nj_data_t nj_data_init_host(nj_read_t r, float p_value, int k);
+
 void nj_read_init(nj_read_t *r)
 {
     r->D = r->S = NULL;
@@ -112,6 +117,38 @@ nj_data_t nj_data_to_host_pointer(nj_data_t d)
 
     cudaMemcpy(d_data.D, d.D, sizeof(float) * size_matrix, cudaMemcpyDeviceToHost);
     cudaMemcpy(d_data.S, d.S, sizeof(float) * d.N, cudaMemcpyDeviceToHost);
+
+    return d_data;
+}
+
+nj_data_t nj_data_init_host(nj_read_t r, float p_value, int k)
+{
+    nj_data_t d_data;
+    size_t size_matrix = r.N * (r.N) / 2;
+    size_t size_select_otus = r.N * p_value;
+
+    d_data.N = r.N;
+    d_data.p = p_value;
+    d_data.k = k;
+    d_data.stride = r.N;
+
+    d_data.D = (float *)calloc(size_matrix, sizeof(float));
+    d_data.Q = (float *)calloc(size_matrix, sizeof(float));
+    d_data.S = (float *)calloc(r.N, sizeof(float));
+    d_data.positions = (int *)calloc(size_matrix, sizeof(int));
+
+    for (int i = 0; i < size_matrix; i++)
+    {
+        d_data.D[i] = r.D[i];
+    }
+
+    for (int i = 0; i < r.N; i++)
+    {
+        d_data.S[i] = r.S[i];
+    }
+
+    // cudaMemcpy(d_data.D, r.D, sizeof(float) * size_matrix, cudaMemcpyHostToHost);
+    // cudaMemcpy(d_data.S, r.S, sizeof(float) * r.N, cudaMemcpyHostToHost);
 
     return d_data;
 }
