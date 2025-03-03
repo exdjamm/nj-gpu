@@ -1,10 +1,11 @@
-nvcc = /usr/local/cuda-12.4/bin/nvcc
 cuda_version = $(nvidia-smi | egrep CUDA | cut -f3 -d: | sed 's/|*//g')
-nvccflag = -std=c++11 -O3 -arch=sm_61 -DHEAP_SORT
+nvcc = /usr/local/cuda-$(cuda_version)/bin/nvcc
+nvccflag = -std=c++11 -O3 -arch=native -DHEAP_SORT
 heappath = ./heap
 timedebugpath = ./
 
 ifeq "$(cuda_version)" ""
+	echo "Not able to find  device cuda version, using default."
 	nvcc = nvcc
 endif
 
@@ -13,11 +14,9 @@ endif
 all: nj_gpu nj_gpu_time
 
 nj_gpu: main.cu
-
 	$(nvcc) $(nvccflag) $< time_debug.cu -DNO_TIME -I$(heappath)/ -I$(timedebugpath)/ -o $@.run
 
 nj_gpu_time: main.cu
-# echo $<
 	$(nvcc) $(nvccflag) $< time_debug.cu -I$(heappath)/ -I$(timedebugpath)/ -o $@.run
 	
 
