@@ -72,7 +72,6 @@ int main(int argc, char const *argv[])
         nj_flex_heap(&data, TPB, hpoint_fnj_cpu);
         data_host = nj_data_to_host_pointer(data);
         TIME_POINT("CPU FNJ", 2, 15);
-        fnj_heap_cpu(data_host);
         TIME_POINT_END(15);
     }
     else if (type == 4)

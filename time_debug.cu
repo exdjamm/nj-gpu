@@ -18,6 +18,10 @@ void init_time()
         info.child_size[i] = 0;
         info.stime[i] = 0;
         info.count[i] = 0;
+        strncpy(info.names[i], "\0", 1);
+
+        for (int j = 0; j < 16; j++)
+            info.child[i][j] = -1;
     }
 }
 
@@ -70,6 +74,8 @@ void time_print(int id, int t)
 #ifdef NO_TIME
     return;
 #endif
+    if (id == -1)
+        return;
 
     for (int i = 0; i < t; i++)
     {
