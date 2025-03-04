@@ -4,10 +4,17 @@
 #include "../nj_read/nj_utils.cuh"
 #include <normal_heap.cuh>
 
+struct otu
+{
+    size_t i;
+    size_t j;
+};
+typedef struct otu otu_t;
+
 void fnj_heap_cpu(nj_data_t data);
 
-void update_d(nj_data_t data, int pos);
-void resize_d(nj_data_t data, int pos, int end_pos);
+void update_d(nj_data_t data, otu_t pos);
+void resize_d(nj_data_t data, otu_t pos, int end_pos);
 
 void fnj_heap_cpu(nj_data_t data)
 {
@@ -15,7 +22,7 @@ void fnj_heap_cpu(nj_data_t data)
     int size_matrix = (data.N / 2) * (data.N - 1);
 
     int pairs_size, collected;
-    int *pairs;
+    otu_t *pairs;
     float out_heap;
     int out_aux;
 
@@ -24,7 +31,7 @@ void fnj_heap_cpu(nj_data_t data)
         pairs_size = 1;
 
     collected = 0;
-    pairs = (int *)calloc(pairs_size + 1, sizeof(int));
+    pairs = (otu_t *)calloc(pairs_size + 1, sizeof(otu_t));
 
     // Initialize Q-Matrix to max values
     /* for (int idx = 0; idx < size_matrix; idx++)
@@ -64,19 +71,22 @@ void fnj_heap_cpu(nj_data_t data)
 
             pop(data.Q, data.positions, &size_matrix, &out_heap, &out_aux);
 
+            // printf("\tTEST DISJUNCT (%d, %d)\n", out_aux / data.N, out_aux % data.N);
             for (int i = 0; i < collected; i++)
             {
                 int i_pos, j_pos;
                 int i_pos_, j_pos_;
 
-                i_pos = pairs[i] / data.N;
-                j_pos = pairs[i] % data.N;
+                i_pos = pairs[i].i;
+                j_pos = pairs[i].j;
 
                 i_pos_ = out_aux / data.N;
                 j_pos_ = out_aux % data.N;
 
                 int result = (i_pos == i_pos_) || (i_pos == j_pos_);
                 result = result || (j_pos == i_pos_) || (j_pos == j_pos_);
+
+                // printf("\t\t%d (%d): (%d, %d) - (%d, %d) -> %d\n", i, collected, i_pos, j_pos, i_pos_, j_pos_, result);
 
                 if (result)
                 {
@@ -90,21 +100,34 @@ void fnj_heap_cpu(nj_data_t data)
 
             printf("%d: (%d, %d) -> %.2f\n", data.N, out_aux / data.N, out_aux % data.N, out_heap);
 
-            pairs[collected] = out_aux;
+            pairs[collected].i = out_aux / data.N;
+            pairs[collected].j = out_aux % data.N;
             collected++;
         }
         printf("\n");
         for (size_t i = 0; i < collected; i++)
         {
             update_d(data, pairs[i]);
+            resize_d(data, pairs[i], data.N - 1);
+            data.N -= 1;
+
+            printf("======== (%d, %d), %d\n", pairs[i].i, pairs[i].j, data.N + 1);
+
+            // AQUI FOI ALTERADO E ESSA ALTERACAO CAUSOU MUDANCA
+            for (int j = 0; j < collected; j++)
+            {
+                if (pairs[j].j == data.N)
+                {
+                    pairs[j].j = pairs[i].j;
+                }
+            }
         }
 
         for (size_t i = 0; i < collected; i++)
         {
-            resize_d(data, pairs[i], data.N - 1 - i);
         }
 
-        data.N -= pairs_size;
+        // data.N -= pairs_size;
         run = data.N >= 3;
         if (!run)
             break;
@@ -113,10 +136,10 @@ void fnj_heap_cpu(nj_data_t data)
     free(pairs);
 }
 
-void update_d(nj_data_t data, int pos)
+void update_d(nj_data_t data, otu_t pos)
 {
-    int i_pos = pos / data.N;
-    int j_pos = pos % data.N;
+    int i_pos = pos.i;
+    int j_pos = pos.j;
 
     float d_ij = d_get_D_position(data, i_pos, j_pos);
     data.S[i_pos] = (data.S[i_pos] + data.S[j_pos] - data.N * d_ij) / 2;
@@ -135,9 +158,9 @@ void update_d(nj_data_t data, int pos)
     }
 }
 
-void resize_d(nj_data_t data, int pos, int end_pos)
+void resize_d(nj_data_t data, otu_t pos, int end_pos)
 {
-    int j_pos = pos % data.N;
+    int j_pos = pos.j;
 
     if (j_pos == end_pos)
         return;
