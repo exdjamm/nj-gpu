@@ -31,15 +31,20 @@ int main(int argc, char const *argv[])
     int TPB = atoi(argv[4]);
     int hpoint_fnj_cpu = atoi(argv[5]);
 
-    printf("file; execution type; p_value; TPB; heaviside point; n otus; time (ms)\n");
-    printf("%s; %d; %.3f; %d; %d;", file, type, p_value, TPB, hpoint_fnj_cpu);
-
     nj_read_t read;
     nj_data_t data, data_host;
     TIME_POINT("READFILE&DEVICE", 0, 1);
     nj_read_init(&read);
 
     nj_read_file(&read, file);
+
+    printf("file: %s \
+            \nexecution type: %d\
+            \np_value: %.3f\
+            \nTPB: %d\
+            \nheaviside point: %d\
+            \nn otus: %d\n",
+           file, type, p_value, TPB, hpoint_fnj_cpu, read.N);
 
     if (type != 4)
     {
@@ -82,7 +87,7 @@ int main(int argc, char const *argv[])
     TIME_POINT_END(2);
     time_end();
 
-    printf(" %d; %.4f;\n", read.N, elapsed_time);
+    printf("time (ms): %.4f\n", elapsed_time);
 
     TIME_POINT_END(0);
 
