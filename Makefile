@@ -11,11 +11,14 @@ endif
 
 #nvcc -O3 main.cu time_debug.cu -DHEAP_SORT -I./ -I./heap -o nj_run.run
 
-all: nj_gpu nj_gpu_time
+all: nj_gpu nj_gpu_treset nj_gpu_time 
 debug: nj_gpu_debug
 
 nj_gpu: main.cu
 	$(nvcc) $(nvccflag) $< time_debug.cu -DNO_TIME -I$(heappath)/ -I$(timedebugpath)/ -o $@.run
+
+nj_gpu_treset: main.cu
+	$(nvcc) $(nvccflag) $< time_debug.cu -DRESET_HEAP -I$(heappath)/ -I$(timedebugpath)/ -o $@.run
 
 nj_gpu_time: main.cu
 	$(nvcc) $(nvccflag) $< time_debug.cu -I$(heappath)/ -I$(timedebugpath)/ -o $@.run
@@ -25,4 +28,4 @@ nj_gpu_debug: main.cu
 
 
 clean:
-	rm -rf nj_gpu.run nj_gpu_time.run nj_gpu_debug.run
+	rm -rf nj_gpu.run nj_gpu_time.run nj_gpu_debug.run nj_gpu_treset.run
