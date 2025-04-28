@@ -50,7 +50,10 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
 
     // Does it need at least once?
     int blockSizeHeapExec = ((batchNum + 1) * batchSize + threads_per_block - 1) / threads_per_block;
-    d_ResetHeap<<<blockSizeHeapExec, threads_per_block>>>(d_heap);
+    int upB, downB;
+    upB = 0;
+    downB = (batchNum + 1) * batchSize;
+    d_ResetHeap<<<blockSizeHeapExec, threads_per_block>>>(d_heap, upB, downB);
     gpuErrchk(cudaPeekAtLastError());
 
     TIME_POINT_END(3);
@@ -78,7 +81,7 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
         h_heap.reset();
 
 #ifdef RESET_HEAP
-        d_ResetHeap<<<blockSizeHeapExec, threads_per_block>>>(d_heap);
+        d_ResetHeap<<<blockSizeHeapExec, threads_per_block>>>(d_heap, upB, downB);
         gpuErrchk(cudaPeekAtLastError());
 #endif
         TIME_POINT_END(5);
@@ -155,8 +158,12 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
         gpuErrchk(cudaDeviceSynchronize());
         TIME_POINT_END(9);
 
+        downB = batchSize * (((size_array + batchSize - 1) / batchSize) + 1);
+
         d->N -= (int)(pair_number);
         size_array = d->N * (d->N) / 2;
+
+        upB = batchSize * (((size_array + batchSize - 1) / batchSize) + 1);
 
         gridMatrix = (size_array + threads_per_block - 1) / threads_per_block;
         gridArray = (d->N + threads_per_block - 1) / threads_per_block;
