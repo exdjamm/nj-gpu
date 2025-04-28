@@ -854,7 +854,7 @@ public:
     }
 };
 
-__global__ void d_ResetHeap(UHeap<float, int> *heap)
+__global__ void d_ResetHeap(UHeap<float, int> *heap, int upB, int downB)
 {
     float *heapItems = heap->heapItems;
     int *auxItems = heap->auxItems;
@@ -863,7 +863,7 @@ __global__ void d_ResetHeap(UHeap<float, int> *heap)
 
     int idx = blockDim.x * blockIdx.x + threadIdx.x;
 
-    for (int index = idx; index < size; index += blockDim.x * gridDim.x)
+    for (int index = idx + upB; (index < size) && (index < downB); index += blockDim.x * gridDim.x)
     {
         heapItems[index] = heap->init_limits;
         auxItems[index] = heap->init_limits_aux;
