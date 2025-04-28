@@ -49,7 +49,8 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
     cudaMemcpy(d_heap, &h_heap, sizeof(UHeap<float, int>), cudaMemcpyHostToDevice);
 
     // Does it need at least once?
-    d_ResetHeap<<<32, threads_per_block>>>(d_heap);
+    int blockSizeHeapExec = ((batchNum + 1) * batchSize + threads_per_block - 1) / threads_per_block;
+    d_ResetHeap<<<blockSizeHeapExec, threads_per_block>>>(d_heap);
     gpuErrchk(cudaPeekAtLastError());
 
     TIME_POINT_END(3);
@@ -77,7 +78,7 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
         h_heap.reset();
 
 #ifdef RESET_HEAP
-        d_ResetHeap<<<32, threads_per_block>>>(d_heap);
+        d_ResetHeap<<<blockSizeHeapExec, threads_per_block>>>(d_heap);
         gpuErrchk(cudaPeekAtLastError());
 #endif
         TIME_POINT_END(5);
@@ -88,7 +89,7 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
         TIME_POINT_END(6);
 
         TIME_POINT("BUILD Q HEAP", 4, 7);
-        buildQUHeap<<<32, threads_per_block, sMemSize>>>(*d, d_heap, batchSize);
+        buildQUHeap<<<blockSizeHeapExec, threads_per_block, sMemSize>>>(*d, d_heap, batchSize);
         gpuErrchk(cudaPeekAtLastError());
         TIME_POINT_END(7);
 
