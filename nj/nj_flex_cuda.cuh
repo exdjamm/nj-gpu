@@ -38,24 +38,48 @@ __global__ void initPositionsData(int *positions, int *collect_number, int size)
 __global__ void buildQUHeap(nj_data_t d, UHeap<float, int> *heap, int batchSize);
 __global__ void getPositionsBatch(UHeap<float, int> *heap, float *batchQ, int *batchPositions, int N, int batchSize);
 
-__global__ void clearBatchPositions(int *positions, int size, int N);
+__global__ void eliminateInjuctions(int *positions, int size, int N, int *r);
 
-__global__ void clearBatchPositions(int *positions, int size, int N)
+__global__ void cleanPositions(int *positions, int *results, int size);
+
+__global__ void cleanPositions(int *positions, int *results, int size)
 {
-    int idx = blockDim.x * blockIdx.x + threadIdx.x;
+    const int idx = blockDim.x * blockIdx.x + threadIdx.x; // Max 1023
 
-    for (; idx < size; idx += blockDim.x * gridDim.x)
-    {
-        int pos = positions[idx];
-
-        for (int j = idx + 1; j < size; j++)
-        {
-            if (hasIntersection(pos, positions[j], N))
-                positions[j] = -1;
-        }
-    }
+    if (results[idx] == -1)
+        positions[idx] = -1;
 }
 
+__global__ void eliminateInjuctions(int *positions, int size, int N, int *r)
+{
+    const int idx = blockDim.x * blockIdx.x + threadIdx.x; // Max 1023
+    const int pos = positions[idx];
+
+    __shared__ int sm_pos[1024];
+
+    int index, result;
+
+    sm_pos[idx] = positions[idx];
+    r[idx] = 1;
+    __syncthreads();
+
+    for (index = 0; index < idx; index += 1)
+    {
+        // #pragma unroll
+        // "for (size_t i = 0; i < 32; i++)
+        // {
+
+        // }
+
+        result = hasIntersection(positions[idx], sm_pos[index], N);
+        if (result)
+        {
+            r[idx] = -1;
+            break;
+        }
+    }
+    __syncthreads();
+}
 /*
  Compare positions already selected with a new positions batch. Those it was not filtered,
  it will be add to selected positions.

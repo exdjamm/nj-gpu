@@ -92,7 +92,7 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
         TIME_POINT_END(6);
 
         TIME_POINT("BUILD Q HEAP", 4, 7);
-        buildQUHeap<<<blockSizeHeapExec, threads_per_block, sMemSize>>>(*d, d_heap, batchSize);
+        buildQUHeap<<<32, threads_per_block, sMemSize>>>(*d, d_heap, batchSize);
         gpuErrchk(cudaPeekAtLastError());
         TIME_POINT_END(7);
 
@@ -106,26 +106,30 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
             gpuErrchk(cudaPeekAtLastError());
 
             TIME_POINT_END(10);
-            cudaMemcpy(h_result, d_batchPositions, sizeof(int) * batchSize, cudaMemcpyDeviceToHost);
+
+            // cudaMemcpy(h_result, d_batchPositions, sizeof(int) * batchSize, cudaMemcpyDeviceToHost);
 
             TIME_POINT("CLEAN POS DEV", 8, 11);
-            // clearBatchPositions<<<1, threads_per_block>>>(d_batchPositions, batchSize, d.N);
-            for (int i = 0; i < batchSize; i++)
-                for (int j = i + 1; j < batchSize; j++)
-                    if (h_result[i] != -1 && h_result[j] != -1)
-                        if (hasIntersection(h_result[i], h_result[j], d->N))
-                            h_result[j] = -1;
+            // // clearBatchPositions<<<1, threads_per_block>>>(d_batchPositions, batchSize, d.N);
+            // for (int i = 0; i < batchSize; i++)
+            //     for (int j = i + 1; j < batchSize; j++)
+            //         if (h_result[i] != -1 && h_result[j] != -1)
+            //             if (hasIntersection(h_result[i], h_result[j], d->N))
+            //                 h_result[j] = -1;
 
-            cudaMemcpy(qValues, d_batchQ, batchSize * sizeof(float), cudaMemcpyDeviceToHost);
+            // cudaMemcpy(qValues, d_batchQ, batchSize * sizeof(float), cudaMemcpyDeviceToHost);
 
-            for (int i = 0; i < batchSize; i++)
-            {
-                if (h_result[i] == -1)
-                    continue;
-                printf("%d: (%d, %d) -> %.2f\n", d->N, h_result[i] / d->N, h_result[i] % d->N, qValues[i]);
-            }
+            // for (int i = 0; i < batchSize; i++)
+            // {
+            //     if (h_result[i] == -1)
+            //         continue;
+            //     printf("%d: (%d, %d) -> %.2f\n", d->N, h_result[i] / d->N, h_result[i] % d->N, qValues[i]);
+            // }
 
-            cudaMemcpy(d_batchPositions, h_result, sizeof(int) * batchSize, cudaMemcpyHostToDevice);
+            // cudaMemcpy(d_batchPositions, h_result, sizeof(int) * batchSize, cudaMemcpyHostToDevice);
+            int blocks = (batchSize + threads_per_block - 1) / threads_per_block;
+            eliminateInjuctions<<<blocks, threads_per_block>>>(d_batchPositions, batchSize, d->N, d_positions);
+            cleanPositions<<<blocks, threads_per_block>>>(d_batchPositions, d_positions, batchSize);
             TIME_POINT_END(11);
 
             TIME_POINT("CONSOLIDATION", 8, 12);
