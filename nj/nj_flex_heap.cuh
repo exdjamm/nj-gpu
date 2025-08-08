@@ -65,7 +65,7 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
     cudaMalloc(&d_batchQ, sizeof(float) * batchSize);
     cudaMalloc(&d_batchPositions, sizeof(int) * batchSize);
 
-    cudaMalloc(&d_positions, sizeof(int) * pair_number);
+    cudaMalloc(&d_positions, sizeof(int) * batchSize);
     cudaMalloc(&d_collected_number, sizeof(int));
 
     TIME_POINT("LOOP", 2, 4);
