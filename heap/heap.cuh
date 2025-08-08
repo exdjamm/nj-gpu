@@ -58,6 +58,14 @@ public:
         batch_size = 0;
     }
 
+    void reset()
+    {
+        cudaMemset(batch_count, 0, sizeof(int));
+        // cudaMemset(partial_buffer_size, 0, sizeof(int));
+
+        cudaMemset(batch_status, AVAIL, sizeof(int) * (max_batch_num));
+    }
+
     __device__ bool atomicChangeStatus(int *status, int oriS, int newS)
     {
         if ((oriS == AVAIL && newS == INUSE) ||
