@@ -1,7 +1,7 @@
 nvcc = /usr/local/cuda-$(cuda_version)/bin/nvcc	
 cuda_version = $(nvidia-smi | egrep CUDA | cut -f3 -d: | sed 's/|*//g')
 nvccflag = -std=c++11 -O3 -arch=native -DHEAP_SORT
-nvccflag_debug = -std=c++11 -g -arch=native -DHEAP_SORT
+nvccflag_debug = -std=c++11 -g -G -arch=native -DHEAP_SORT
 heappath = ./heap
 timedebugpath = ./
 
