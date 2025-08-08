@@ -78,7 +78,7 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
         h_collect_number = 0;
 
         TIME_POINT("HEAP RESET", 4, 5);
-        // h_heap.reset();
+        h_heap.reset();
 
 #ifdef RESET_HEAP
         // d_ResetHeap<<<blockSizeHeapExec, threads_per_block>>>(d_heap, upB, downB);
@@ -107,26 +107,8 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
 
             TIME_POINT_END(10);
 
-            // cudaMemcpy(h_result, d_batchPositions, sizeof(int) * batchSize, cudaMemcpyDeviceToHost);
-
             TIME_POINT("CLEAN POS DEV", 8, 11);
-            // // clearBatchPositions<<<1, threads_per_block>>>(d_batchPositions, batchSize, d.N);
-            // for (int i = 0; i < batchSize; i++)
-            //     for (int j = i + 1; j < batchSize; j++)
-            //         if (h_result[i] != -1 && h_result[j] != -1)
-            //             if (hasIntersection(h_result[i], h_result[j], d->N))
-            //                 h_result[j] = -1;
 
-            // cudaMemcpy(qValues, d_batchQ, batchSize * sizeof(float), cudaMemcpyDeviceToHost);
-
-            // for (int i = 0; i < batchSize; i++)
-            // {
-            //     if (h_result[i] == -1)
-            //         continue;
-            //     printf("%d: (%d, %d) -> %.2f\n", d->N, h_result[i] / d->N, h_result[i] % d->N, qValues[i]);
-            // }
-
-            // cudaMemcpy(d_batchPositions, h_result, sizeof(int) * batchSize, cudaMemcpyHostToDevice);
             int blocks = (batchSize + threads_per_block - 1) / threads_per_block;
             eliminateInjuctions<<<blocks, threads_per_block>>>(d_batchPositions, batchSize, d->N, d_positions);
             gpuErrchk(cudaPeekAtLastError());
@@ -148,10 +130,11 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
 
         cudaMemcpy(h_positions, d_positions, sizeof(int) * pair_number, cudaMemcpyDeviceToHost);
         gpuErrchk(cudaPeekAtLastError());
+
         TIME_POINT("UPDATE&RESIZE", 4, 9);
+
         for (int i = 0; i < pair_number; i++)
         {
-            printf("%d, %d\n", h_positions[i] / d->N, h_positions[i] % d->N);
             updateD<<<gridArray, threads_per_block>>>(*d, h_positions[i]);
             gpuErrchk(cudaPeekAtLastError());
         }
