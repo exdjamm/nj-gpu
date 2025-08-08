@@ -31,7 +31,7 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
 
     size_array = d->N * (d->N) / 2;
     batchSize = 1024;
-    batchNum = 1024 * 512;
+    batchNum = (size_array + batchSize - 1) / batchSize;
 
     sMemSize = batchSize * 4 * sizeof(float) + batchSize * 4 * sizeof(int);
     sMemSize += /* (threads_per_block + 1) * sizeof(int) + */ 2 * batchSize * sizeof(float) + 2 * batchSize * sizeof(int);
