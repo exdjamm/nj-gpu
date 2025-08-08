@@ -138,9 +138,9 @@ public:
         K *items_2 = items_sm + batch_size;
         K *items_3 = items_sm + 2 * batch_size;
 
-        K *items_aux_1 = items_aux_sm;
-        K *items_aux_2 = items_aux_sm + batch_size;
-        K *items_aux_3 = items_aux_sm + 2 * batch_size;
+        A *items_aux_1 = items_aux_sm;
+        A *items_aux_2 = items_aux_sm + batch_size;
+        A *items_aux_3 = items_aux_sm + 2 * batch_size;
 
         int lastIndex;
 
@@ -172,9 +172,9 @@ public:
         __syncthreads();
 
         // Copy lastIndex to SM
-        batchCopy(items_1, heap + lastIndex * batch_size,
-                  items_aux_1, heap_aux + lastIndex * batch_size,
-                  batch_size, true, k_init_limit);
+        batchCopy<K, A>(items_1, heap + lastIndex * batch_size,
+                        items_aux_1, heap_aux + lastIndex * batch_size,
+                        batch_size, true, k_init_limit);
 
         if (threadIdx.x == 0)
         {
