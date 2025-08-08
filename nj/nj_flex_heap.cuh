@@ -81,7 +81,7 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
         // h_heap.reset();
 
 #ifdef RESET_HEAP
-        d_ResetHeap<<<blockSizeHeapExec, threads_per_block>>>(d_heap, upB, downB);
+        // d_ResetHeap<<<blockSizeHeapExec, threads_per_block>>>(d_heap, upB, downB);
         gpuErrchk(cudaPeekAtLastError());
 #endif
         TIME_POINT_END(5);
