@@ -172,9 +172,9 @@ public:
         __syncthreads();
 
         // Copy lastIndex to SM
-        batchCopy<K, A><K, A>(items_1, heap + lastIndex * batch_size,
-                              items_aux_1, heap_aux + lastIndex * batch_size,
-                              batch_size, true, k_init_limit);
+        batchCopy<K, A>(items_1, heap + lastIndex * batch_size,
+                        items_aux_1, heap_aux + lastIndex * batch_size,
+                        batch_size, true, k_init_limit);
 
         if (threadIdx.x == 0)
         {
