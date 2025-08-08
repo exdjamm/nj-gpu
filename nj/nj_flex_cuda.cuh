@@ -4,7 +4,7 @@
 #include <float.h>
 
 #include "../nj_read/nj_utils.cuh"
-#include "../heap/uheap.cuh"
+#include "../heap/heap.cuh"
 
 __device__ int atomicIncFixed(int *address, int limit)
 {
@@ -35,8 +35,8 @@ __device__ void pushEliminetedToEndPositions(int *positions, int size);
 
 __global__ void initPositionsData(int *positions, int *collect_number, int size);
 
-__global__ void buildQUHeap(nj_data_t d, UHeap<float, int> *heap, int batchSize);
-__global__ void getPositionsBatch(UHeap<float, int> *heap, float *batchQ, int *batchPositions, int N, int batchSize);
+__global__ void buildQUHeap(nj_data_t d, KAuxHeap<float, int> *heap, int batchSize);
+__global__ void getPositionsBatch(KAuxHeap<float, int> *heap, float *batchQ, int *batchPositions, int N, int batchSize);
 
 __global__ void eliminateInjuctions(int *positions, int size, int N, int *r);
 
@@ -121,7 +121,7 @@ __global__ void consolidationOfPositions(int *positions, int *new_positions, int
 }
 
 // utilizar shared mem é melhor se quiser realizar varias entradas em blocos diferentes, usando a global so pode um!
-__global__ void buildQUHeap(nj_data_t d, UHeap<float, int> *heap, int batchSize)
+__global__ void buildQUHeap(nj_data_t d, KAuxHeap<float, int> *heap, int batchSize)
 {
     extern __shared__ int sm[];
     float *batchQ = (float *)&sm[0];
@@ -139,7 +139,7 @@ __global__ void buildQUHeap(nj_data_t d, UHeap<float, int> *heap, int batchSize)
     }
 }
 
-__global__ void getPositionsBatch(UHeap<float, int> *heap, float *batchQ, int *batchPositions, int N, int batchSize)
+__global__ void getPositionsBatch(KAuxHeap<float, int> *heap, float *batchQ, int *batchPositions, int N, int batchSize)
 {
     int batchNeeded = 1;
     int outSize = 0;
@@ -148,11 +148,11 @@ __global__ void getPositionsBatch(UHeap<float, int> *heap, float *batchQ, int *b
     {
 
         // delete items from heap
-        if (heap->deleteRoot(batchQ, batchPositions, outSize) == true)
+        if (heap->delete_root(batchQ, batchPositions, outSize) == true)
         {
             __syncthreads();
 
-            heap->deleteUpdate(0);
+            heap->delete_update(0);
         }
         __syncthreads();
     }
