@@ -1,7 +1,7 @@
 #ifndef _H_NJ_FLEX_HEAP
 #define _H_NJ_FLEX_HEAP
 
-#include "../heap/uheap.cuh"
+#include "../heap/heap.cuh"
 
 #include "nj_cuda.cuh"
 #include "nj_flex_cuda.cuh"
@@ -42,18 +42,18 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
 
     run = d->N >= N_STOP;
     TIME_POINT("HEAP ALLOC", 2, 3);
-    UHeap<float, int> h_heap(batchNum, batchSize, FLT_MAX, -1);
-    UHeap<float, int> *d_heap;
+    KAuxHeap<float, int> h_heap(batchNum, batchSize, FLT_MAX, -1);
+    KAuxHeap<float, int> *d_heap;
 
-    cudaMalloc((void **)&d_heap, sizeof(UHeap<float, int>));
-    cudaMemcpy(d_heap, &h_heap, sizeof(UHeap<float, int>), cudaMemcpyHostToDevice);
+    cudaMalloc((void **)&d_heap, sizeof(KAuxHeap<float, int>));
+    cudaMemcpy(d_heap, &h_heap, sizeof(KAuxHeap<float, int>), cudaMemcpyHostToDevice);
 
     // Does it need at least once?
     int blockSizeHeapExec = ((batchNum + 1) * batchSize + threads_per_block - 1) / threads_per_block;
     int upB, downB;
     upB = 0;
     downB = (batchNum + 1) * batchSize;
-    d_ResetHeap<<<blockSizeHeapExec, threads_per_block>>>(d_heap, upB, downB);
+    // d_ResetHeap<<<blockSizeHeapExec, threads_per_block>>>(d_heap, upB, downB);
     gpuErrchk(cudaPeekAtLastError());
 
     TIME_POINT_END(3);
@@ -78,7 +78,7 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
         h_collect_number = 0;
 
         TIME_POINT("HEAP RESET", 4, 5);
-        h_heap.reset();
+        // h_heap.reset();
 
 #ifdef RESET_HEAP
         d_ResetHeap<<<blockSizeHeapExec, threads_per_block>>>(d_heap, upB, downB);
