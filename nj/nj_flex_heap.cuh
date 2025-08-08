@@ -129,22 +129,25 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
             // cudaMemcpy(d_batchPositions, h_result, sizeof(int) * batchSize, cudaMemcpyHostToDevice);
             int blocks = (batchSize + threads_per_block - 1) / threads_per_block;
             eliminateInjuctions<<<blocks, threads_per_block>>>(d_batchPositions, batchSize, d->N, d_positions);
+            gpuErrchk(cudaPeekAtLastError());
+
             cleanPositions<<<blocks, threads_per_block>>>(d_batchPositions, d_positions, batchSize);
             TIME_POINT_END(11);
-
+            gpuErrchk(cudaPeekAtLastError());
             TIME_POINT("CONSOLIDATION", 8, 12);
             consolidationOfPositions<<<1, threads_per_block>>>(d_positions, d_batchPositions, d_collected_number, pair_number, batchSize, d->N);
             gpuErrchk(cudaPeekAtLastError());
 
             cudaMemcpy(&h_collect_number, d_collected_number, sizeof(int), cudaMemcpyDeviceToHost);
             TIME_POINT_END(12);
+            gpuErrchk(cudaPeekAtLastError());
         }
         TIME_POINT_END(8);
 
         // updateDK<<<1, threads_per_block>>>(d, d_positions, pair_number);
 
         cudaMemcpy(h_positions, d_positions, sizeof(int) * pair_number, cudaMemcpyDeviceToHost);
-
+        gpuErrchk(cudaPeekAtLastError());
         TIME_POINT("UPDATE&RESIZE", 4, 9);
         for (int i = 0; i < pair_number; i++)
         {
