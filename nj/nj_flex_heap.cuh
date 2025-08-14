@@ -195,6 +195,7 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
 
     free(h_result);
     free(h_positions);
+    free(table_consult);
 
     cudaFree(d_heap);
     cudaFree(d_collected_number);
