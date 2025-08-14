@@ -163,10 +163,14 @@ void free_nj_data_device(nj_data_t d)
 
 void free_nj_data_host(nj_data_t d)
 {
-    free(d.D);
-    free(d.S);
-    free(d.Q);
-    free(d.positions);
+    if (d.D != NULL)
+        free(d.D);
+    if (d.S != NULL)
+        free(d.S);
+    if (d.Q != NULL)
+        free(d.Q);
+    if (d.positions != NULL)
+        free(d.positions);
 }
 
 #endif
