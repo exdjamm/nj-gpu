@@ -154,11 +154,8 @@ void update_d(nj_data_t data, otu_t pos, otu_t *pairs, int pairs_size)
     {
         int cont = 0;
         for (int pair = 0; pair < pairs_size; pair++)
-        {
-            cont = (i == pairs[pair].i) || (i == pairs[pair].j);
-            if (cont)
-                break;
-        }
+            if ((i == pairs[pair].i) || (i == pairs[pair].j))
+                cont = 1;
 
         if (cont)
             continue;
