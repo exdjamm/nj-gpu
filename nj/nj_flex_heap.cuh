@@ -116,6 +116,9 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
             for (int i = 0; i < batchSize; i++)
             {
 
+                if (h_result[i] == -1)
+                    continue;
+
                 int i_position = h_result[i] / d->N;
                 int j_position = h_result[i] % d->N;
                 // printf("%d: (%d, %d) at %d\n", d->N, i_position, j_position, i);
