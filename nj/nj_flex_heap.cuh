@@ -18,6 +18,7 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
         pair_number = 1;
     int gridMatrix, gridArray, gridPairNumber;
 
+    int *table_consult;
     int *h_result;
     float *qValues;
     int *h_positions, *d_positions;
@@ -59,6 +60,7 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
     TIME_POINT_END(3);
 
     h_result = (int *)calloc(sizeof(int), batchSize);
+    table_consult = (int *)calloc(sizeof(int), d->N);
     qValues = (float *)calloc(sizeof(float), batchSize);
     h_positions = (int *)calloc(sizeof(int), pair_number);
 
@@ -79,16 +81,18 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
 
         TIME_POINT("HEAP RESET", 4, 5);
         h_heap.reset();
-
+        gpuErrchk(cudaPeekAtLastError());
 #ifdef RESET_HEAP
         // d_ResetHeap<<<blockSizeHeapExec, threads_per_block>>>(d_heap, upB, downB);
         gpuErrchk(cudaPeekAtLastError());
 #endif
         TIME_POINT_END(5);
 
-        TIME_POINT("CLEAR POSITIONS", 4, 6);
-        initPositionsData<<<gridPairNumber, threads_per_block>>>(d_positions, d_collected_number, pair_number);
-        gpuErrchk(cudaPeekAtLastError());
+        TIME_POINT("CLEAR TABLE CONS", 4, 6);
+        // initPositionsData<<<gridPairNumber, threads_per_block>>>(d_positions, d_collected_number, pair_number);
+        for (int i = 0; i < d->N; i++)
+            table_consult[i] = 0;
+        // gpuErrchk(cudaPeekAtLastError());
         TIME_POINT_END(6);
 
         TIME_POINT("BUILD Q HEAP", 4, 7);
@@ -108,19 +112,46 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
             TIME_POINT_END(10);
 
             TIME_POINT("CLEAN POS DEV", 8, 11);
+            cudaMemcpy(&h_result, d_batchPositions, sizeof(int) * batchSize, cudaMemcpyDeviceToHost);
+            for (int i = 0; i < batchSize; i++)
+            {
+                int i_position = h_result[i] / d->N;
+                int j_position = h_result[i] % d->N;
 
-            int blocks = (batchSize + threads_per_block - 1) / threads_per_block;
-            eliminateInjuctions<<<blocks, threads_per_block>>>(d_batchPositions, batchSize, d->N, d_positions);
-            gpuErrchk(cudaPeekAtLastError());
+                if (!table_consult[i_position] && !table_consult[j_position])
+                {
+                    table_consult[i_position] = 1;
+                    table_consult[j_position] = 1;
+                }
+                else
+                {
+                    h_result[i] = -1;
+                }
+            }
+            // int blocks = (batchSize + threads_per_block - 1) / threads_per_block;
+            // eliminateInjuctions<<<blocks, threads_per_block>>>(d_batchPositions, batchSize, d->N, d_positions);
+            // gpuErrchk(cudaPeekAtLastError());
 
-            cleanPositions<<<blocks, threads_per_block>>>(d_batchPositions, d_positions, batchSize);
+            // cleanPositions<<<blocks, threads_per_block>>>(d_batchPositions, d_positions, batchSize);
+
+            // TODO: MEMCPY TO HOST POSITIONS, CLEN POSITION WITH A REF TABLE, MEMCPY TO DEVICE
             TIME_POINT_END(11);
             gpuErrchk(cudaPeekAtLastError());
             TIME_POINT("CONSOLIDATION", 8, 12);
-            consolidationOfPositions<<<1, threads_per_block>>>(d_positions, d_batchPositions, d_collected_number, pair_number, batchSize, d->N);
-            gpuErrchk(cudaPeekAtLastError());
+            for (int i = 0; i < batchSize; i++)
+            {
+                if (h_result[i] == -1)
+                    continue;
 
-            cudaMemcpy(&h_collect_number, d_collected_number, sizeof(int), cudaMemcpyDeviceToHost);
+                h_positions[h_collect_number] = h_result[i];
+                h_collect_number++;
+                if (h_collect_number >= pair_number)
+                    break;
+            }
+            // consolidationOfPositions<<<1, threads_per_block>>>(d_positions, d_batchPositions, d_collected_number, pair_number, batchSize, d->N);
+            // gpuErrchk(cudaPeekAtLastError());
+
+            // cudaMemcpy(&h_collect_number, d_collected_number, sizeof(int), cudaMemcpyDeviceToHost);
             TIME_POINT_END(12);
             gpuErrchk(cudaPeekAtLastError());
         }
@@ -128,8 +159,8 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
 
         // updateDK<<<1, threads_per_block>>>(d, d_positions, pair_number);
 
-        cudaMemcpy(h_positions, d_positions, sizeof(int) * pair_number, cudaMemcpyDeviceToHost);
-        gpuErrchk(cudaPeekAtLastError());
+        // cudaMemcpy(h_positions, d_positions, sizeof(int) * pair_number, cudaMemcpyDeviceToHost);
+        // gpuErrchk(cudaPeekAtLastError());
 
         TIME_POINT("UPDATE&RESIZE", 4, 9);
 
