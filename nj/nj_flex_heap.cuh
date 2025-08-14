@@ -118,7 +118,7 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
 
                 int i_position = h_result[i] / d->N;
                 int j_position = h_result[i] % d->N;
-                printf("%d: (%d, %d) at %d\n", d->N, i_position, j_position, i);
+                // printf("%d: (%d, %d) at %d\n", d->N, i_position, j_position, i);
 
                 if (!table_consult[i_position] && !table_consult[j_position])
                 {
