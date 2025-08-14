@@ -33,6 +33,10 @@ int main(int argc, char const *argv[])
 
     nj_read_t read;
     nj_data_t data, data_host;
+    data_host.D = NULL;
+    data_host.Q = NULL;
+    data_host.S = NULL;
+    data_host.positions = NULL;
     TIME_POINT("READFILE&DEVICE", 0, 1);
     nj_read_init(&read);
 
