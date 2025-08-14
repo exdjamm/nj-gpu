@@ -112,7 +112,7 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
             TIME_POINT_END(10);
 
             TIME_POINT("CLEAN POS DEV", 8, 11);
-            cudaMemcpy(&h_result, d_batchPositions, sizeof(int) * batchSize, cudaMemcpyDeviceToHost);
+            cudaMemcpy(h_result, d_batchPositions, sizeof(int) * batchSize, cudaMemcpyDeviceToHost);
             for (int i = 0; i < batchSize; i++)
             {
 
