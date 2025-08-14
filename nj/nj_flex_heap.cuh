@@ -8,9 +8,9 @@
 
 #include <time_debug.cuh>
 
-void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP);
+void nj_flex_heap(nj_data_t *d, int threads_per_block, int heap_block_size, int N_STOP);
 
-void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
+void nj_flex_heap(nj_data_t *d, int threads_per_block, int heap_block_size, int N_STOP)
 {
     int size_array, run;
     int pair_number = d->N * d->p;
@@ -31,7 +31,7 @@ void nj_flex_heap(nj_data_t *d, int threads_per_block, int N_STOP)
     size_t sMemSize;
 
     size_array = d->N * (d->N) / 2;
-    batchSize = 1024;
+    batchSize = heap_block_size;
     batchNum = (size_array + batchSize - 1) / batchSize;
 
     sMemSize = batchSize * 4 * sizeof(float) + batchSize * 4 * sizeof(int);

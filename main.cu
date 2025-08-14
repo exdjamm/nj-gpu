@@ -18,9 +18,9 @@
 int main(int argc, char const *argv[])
 {
     TIME_POINT("MAIN", -1, 0);
-    if (argc != 6)
+    if (argc != 7)
     {
-        printf("Arguments in the form: [file] [type] [p] [TPB] [HEAVISIDE FNJ_CPU]\n");
+        printf("Arguments in the form: [file] [type] [p] [TPB] [HEAP BLOCK SIZE] [HEAVISIDE FNJ_CPU]\n");
         return 1;
     }
 
@@ -29,7 +29,8 @@ int main(int argc, char const *argv[])
     float p_value = atof(argv[3]);
     // int k_number = atoi(argv[4]);
     int TPB = atoi(argv[4]);
-    int hpoint_fnj_cpu = atoi(argv[5]);
+    int heap_block_size = atoi(argv[5]);
+    int hpoint_fnj_cpu = atoi(argv[6]);
 
     nj_read_t read;
     nj_data_t data, data_host;
@@ -46,9 +47,10 @@ int main(int argc, char const *argv[])
             \nexecution type: %d\
             \np_value: %.3f\
             \nTPB: %d\
+            \nBLOCK SIZE: %d\
             \nheaviside point: %d\
             \nn otus: %d\n",
-           file, type, p_value, TPB, hpoint_fnj_cpu, read.N);
+           file, type, p_value, TPB, heap_block_size, hpoint_fnj_cpu, read.N);
 
     if (type != 4)
     {
@@ -74,11 +76,11 @@ int main(int argc, char const *argv[])
     }
     else if (type == 2) // FNJ - kHeap
     {
-        nj_flex_heap(&data, TPB, 3);
+        nj_flex_heap(&data, TPB, heap_block_size, 3);
     }
     else if (type == 3)
     {
-        nj_flex_heap(&data, TPB, hpoint_fnj_cpu);
+        nj_flex_heap(&data, TPB, heap_block_size, hpoint_fnj_cpu);
         data_host = nj_data_to_host_pointer(data);
         TIME_POINT("CPU FNJ", 2, 15);
         TIME_POINT_END(15);
